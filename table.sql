@@ -18,6 +18,11 @@ CREATE TABLE tasks(
  shot VARCHAR(50) NOT NULL
 );
 
+CREATE TABLE projects(
+	id SERIAL PRIMARY KEY,
+	name VARCHAR(50) NOT NULL,
+	description VARCHAR(1000)
+);
 
 INSERT INTO tasks (project, scene, shot, description, status, priority, executor, supervisor, deadline)
 VALUES (
