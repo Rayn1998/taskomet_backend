@@ -1,31 +1,46 @@
-import TelegramBot from 'node-telegram-bot-api';
+import TelegramBot, { Message, CallbackQuery, CopyMessageOptions } from 'node-telegram-bot-api';
 import { Pool } from 'pg';
 import Google from '../google/google.service';
+import Artist from '../artist/artist.service';
+
+import { isMessage, isCallbackQuery } from '../typeguards/typeguards';
+import { commands, commandHandlers } from './handlers/commands';
+import { botAddCommands, botCommands } from './bot.commands';
 
 export default class Bot {
     bot: TelegramBot;
     db: Pool;
+    artist: Artist;
     google: Google;
+    process: boolean;
 
-    constructor(
-        botInstance: TelegramBot,
-        dbInstance: Pool,
-        googleInstance: Google
-    ) {
+    constructor(botInstance: TelegramBot, dbInstance: Pool, googleInstance: Google, artistInstance: Artist) {
         this.bot = botInstance;
         this.db = dbInstance;
+        this.artist = artistInstance;
         this.google = googleInstance;
+        this.process = false;
     }
 
     async init() {
-        const dbConnection = await this.connectToDb();
-        const settingCommands = await this.setCommands();
-        if (!dbConnection || !settingCommands) {
-            console.error("Something doesn't work, check");
-            process.exit(1);
+        try {
+            const dbConnection = await this.connectToDb();
+            const commandsStatus = await this.setCommands();
+            const googleConnection = await this.google.init();
+
+            if (!dbConnection || !commandsStatus || !googleConnection) {
+                throw new Error("Something doesn't work, check");
+            }
+
+            console.log('Bot started to work');
+            await this.listen();
+        } catch (err) {
+            if (err instanceof Error) {
+                console.error(err.message);
+            } else {
+                console.error('An unknown error occurred');
+            }
         }
-        console.log('Bot started to work');
-        await this.listen();
     }
 
     async connectToDb(): Promise<boolean> {
@@ -43,23 +58,7 @@ export default class Bot {
 
     async setCommands(): Promise<boolean> {
         try {
-            await this.bot.setMyCommands(
-                [
-                    {
-                        command: 'start',
-                        description: 'Приветствие бота',
-                    },
-                    {
-                        command: 'getmetadata',
-                        description: 'get the metadata',
-                    },
-                ],
-                {
-                    scope: {
-                        type: 'all_group_chats',
-                    },
-                }
-            );
+            await this.bot.setMyCommands(commands);
             return true;
         } catch (err) {
             console.error('Ошибка при установке команд: ', err);
@@ -67,13 +66,113 @@ export default class Bot {
         }
     }
 
+    getChatIdAndInputData(msg: Message | CallbackQuery): {
+        chatId: number;
+        inputData: string;
+    } {
+        let chatId = 0;
+        let inputData = '';
+
+        if (isMessage(msg)) {
+            chatId = msg.chat.id;
+            inputData = msg.text!;
+        } else if (isCallbackQuery(msg)) {
+            chatId = msg.message!.chat.id;
+            inputData = msg.data!;
+        }
+
+        return { chatId, inputData };
+    }
+
+    checkCommands(text: string): boolean {
+        if (botCommands.some((regex) => regex.test(text))) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    checkAddCommands(text: string): boolean {
+        if (botAddCommands.some((regex) => regex.test(text))) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    async sendMessage(chatId: number, message: string, options?: CopyMessageOptions) {
+        try {
+            await this.bot.sendMessage(chatId, message, options);
+        } catch (err) {
+            throw err;
+        }
+    }
+
+    async checkInSomeProcess(msg: Message | CallbackQuery): Promise<boolean> {
+        const { chatId, inputData } = this.getChatIdAndInputData(msg);
+        if (this.process && this.checkAddCommands(inputData)) {
+            await this.sendMessage(chatId, 'Вы начали, но не завершили процесс создания или добавления. Пожалуйста, завершите его или отмените', {
+                reply_markup: {
+                    inline_keyboard: [
+                        [
+                            {
+                                text: 'Отменить',
+                                callback_data: 'cancel',
+                            },
+                        ],
+                    ],
+                },
+            });
+            return true;
+        }
+        return false;
+    }
+
+    async cancelAllStarted(chatId: number) {
+        this.artist.deleteStates(this, chatId);
+
+        await this.sendMessage(chatId, 'Отмена');
+    }
+
     async listen() {
-        this.bot.onText(/\/start/, async (msg) => {
-            await this.bot.sendMessage(msg.chat.id, 'bot started');
+        this.bot.onText(/.*/, async (msg) => {
+            const { chatId, inputData } = this.getChatIdAndInputData(msg);
+
+            if (commandHandlers.has(inputData)) {
+                await commandHandlers.get(inputData)!(this, msg);
+            }
         });
-        this.bot.onText(/\/getmetadata/, async (msg) => {
-            await this.google.getMetaData();
-            // await this.bot.sendMessage(msg.chat.id, `${metaData}`);
+
+        this.bot.on('message', async (msg) => {
+            const { chatId, inputData } = this.getChatIdAndInputData(msg);
+
+            if (this.checkAddCommands(inputData) || this.checkCommands(inputData)) {
+                return;
+            }
+
+            if (this.process) {
+                if (this.artist.newArtistProcess) {
+                    await this.artist.addNewArtist(this, msg);
+                    return;
+                }
+            }
+        });
+
+        this.bot.on('callback_query', async (query) => {
+            const { chatId, inputData } = this.getChatIdAndInputData(query);
+
+            if (!chatId || !inputData) return;
+
+            if (inputData === 'cancel') {
+                await this.cancelAllStarted(chatId);
+                return;
+            }
+
+            if (this.process) {
+                if (this.artist.newArtistProcess) {
+                    await this.artist.addNewArtist(this, query);
+                }
+            }
         });
     }
 }
