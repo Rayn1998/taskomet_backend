@@ -16,7 +16,7 @@ export default class Google {
         this.sheets = null;
     }
 
-    async init(): Promise<boolean> {
+    public async init(): Promise<boolean> {
         try {
             this.auth = new google.auth.GoogleAuth({
                 keyFile: credentials,
@@ -37,7 +37,7 @@ export default class Google {
         return true;
     }
 
-    async getProjects() {
+    public async getProjects() {
         return await this.sheets?.spreadsheets.values.get({
             auth: this.auth as any,
             spreadsheetId,
@@ -46,7 +46,7 @@ export default class Google {
     }
 
     //FOR TEST
-    async getHOLtasks() {
+    public async getHOLtasks() {
         return await this.sheets?.spreadsheets.values.get({
             auth: this.auth as any,
             spreadsheetId,
@@ -55,7 +55,7 @@ export default class Google {
     }
 
     // FOR TEST
-    async getMetaData() {
+    public async getMetaData() {
         const metaData = await this.sheets?.spreadsheets.get({
             auth: this.auth as any,
             spreadsheetId,

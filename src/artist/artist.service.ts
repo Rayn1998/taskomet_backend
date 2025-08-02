@@ -11,7 +11,7 @@ export default class Artist {
         this.newArtistProcess = {};
     }
 
-    async addNewArtist(bot: Bot, msg: Message | CallbackQuery): Promise<void> {
+    public async addNewArtist(bot: Bot, msg: Message | CallbackQuery): Promise<void> {
         const { chatId, inputData } = bot.getChatIdAndInputData(msg);
         const process = this.newArtistProcess[chatId];
 
@@ -54,7 +54,10 @@ export default class Artist {
                     process.artist.tgId = inputData;
 
                     try {
-                        await bot.db.query(`INSERT INTO artist(name, role, tgid) VALUES ($1, $2, $3)`, [process.artist.name, process.artist.role, process.artist.tgId]);
+                        await bot.db.query(
+                            `INSERT INTO artist(name, role, tgid) VALUES ($1, $2, $3)`,
+                            [process.artist.name, process.artist.role, process.artist.tgId]
+                        );
 
                         await bot.sendMessage(chatId, 'Артист успешно добавлен');
                     } catch (err) {
@@ -90,7 +93,7 @@ export default class Artist {
         });
     }
 
-    deleteStates(bot: Bot, chatId: number) {
+    public deleteStates(bot: Bot, chatId: number) {
         delete this.newArtistProcess[chatId];
         bot.process = false;
     }

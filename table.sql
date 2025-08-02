@@ -13,7 +13,8 @@ CREATE TABLE tasks(
  project INT NOT NULL,
  scene VARCHAR(50) NOT NULL,
  status INTEGER NOT NULL,
- shot VARCHAR(50) NOT NULL
+ shot VARCHAR(50) NOT NULL,
+ notified BOOLEAN NOT NULL,
 );
 
 CREATE TABLE projects(
@@ -21,3 +22,10 @@ CREATE TABLE projects(
 	name VARCHAR(50) NOT NULL,
 	description VARCHAR(1000)
 );
+
+CREATE TABLE comments(
+	id SERIAL PRIMARY KEY,
+	task_id INTEGER REFERENCES tasks(id),
+	text VARCHAR(500) NOT NULL,
+	created_at TIMESTAMP NOT NULL
+)

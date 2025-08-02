@@ -1,6 +1,8 @@
 import Bot from '../bot.service';
 import { Message } from 'node-telegram-bot-api';
 
+import { getTasks } from '../functions/functions';
+
 export const commandHandlers = new Map<string, (bot: Bot, msg: Message) => Promise<void>>();
 
 commandHandlers.set('/start', async (bot, msg) => {
@@ -11,9 +13,8 @@ commandHandlers.set('/addartist', async (bot, msg) => {
     await bot.artist.addNewArtist(bot, msg);
 });
 
-commandHandlers.set('/testgoogle', async (bot, msg) => {
-    const data = await bot.google.getHOLtasks();
-    console.log(data?.data.values);
+commandHandlers.set('/gettasks', async (bot, msg) => {
+    await getTasks(bot, msg);
 });
 
 commandHandlers.set('/getprojects', async (bot, msg) => {
@@ -27,7 +28,6 @@ commandHandlers.set('/getprojects', async (bot, msg) => {
             `
         );
     }
-    // console.log(data?.data.values);
 });
 
 export const commands = [
@@ -39,10 +39,9 @@ export const commands = [
         command: 'addartist',
         description: 'Добавление нового артиста',
     },
-    // for test
     {
-        command: 'testgoogle',
-        description: 'testgoogle',
+        command: 'gettasks',
+        description: 'Получить список своих задач',
     },
     // for test
     {

@@ -14,7 +14,12 @@ export default class Bot {
     google: Google;
     process: boolean;
 
-    constructor(botInstance: TelegramBot, dbInstance: Pool, googleInstance: Google, artistInstance: Artist) {
+    constructor(
+        botInstance: TelegramBot,
+        dbInstance: Pool,
+        googleInstance: Google,
+        artistInstance: Artist
+    ) {
         this.bot = botInstance;
         this.db = dbInstance;
         this.artist = artistInstance;
@@ -22,10 +27,10 @@ export default class Bot {
         this.process = false;
     }
 
-    async init() {
+    public async init() {
         try {
-            const dbConnection = await this.connectToDb();
-            const commandsStatus = await this.setCommands();
+            const dbConnection = await this._connectToDb();
+            const commandsStatus = await this._setCommands();
             const googleConnection = await this.google.init();
 
             if (!dbConnection || !commandsStatus || !googleConnection) {
@@ -43,7 +48,7 @@ export default class Bot {
         }
     }
 
-    async connectToDb(): Promise<boolean> {
+    private async _connectToDb(): Promise<boolean> {
         try {
             const connection = await this.db.connect();
             if (connection) {
@@ -56,7 +61,7 @@ export default class Bot {
         }
     }
 
-    async setCommands(): Promise<boolean> {
+    private async _setCommands(): Promise<boolean> {
         try {
             await this.bot.setMyCommands(commands);
             return true;
@@ -66,7 +71,7 @@ export default class Bot {
         }
     }
 
-    getChatIdAndInputData(msg: Message | CallbackQuery): {
+    public getChatIdAndInputData(msg: Message | CallbackQuery): {
         chatId: number;
         inputData: string;
     } {
@@ -84,7 +89,7 @@ export default class Bot {
         return { chatId, inputData };
     }
 
-    checkCommands(text: string): boolean {
+    private _checkCommands(text: string): boolean {
         if (botCommands.some((regex) => regex.test(text))) {
             return true;
         } else {
@@ -92,7 +97,7 @@ export default class Bot {
         }
     }
 
-    checkAddCommands(text: string): boolean {
+    private _checkAddCommands(text: string): boolean {
         if (botAddCommands.some((regex) => regex.test(text))) {
             return true;
         } else {
@@ -100,7 +105,7 @@ export default class Bot {
         }
     }
 
-    async sendMessage(chatId: number, message: string, options?: CopyMessageOptions) {
+    public async sendMessage(chatId: number, message: string, options?: CopyMessageOptions) {
         try {
             await this.bot.sendMessage(chatId, message, options);
         } catch (err) {
@@ -108,33 +113,37 @@ export default class Bot {
         }
     }
 
-    async checkInSomeProcess(msg: Message | CallbackQuery): Promise<boolean> {
+    public async checkInSomeProcess(msg: Message | CallbackQuery): Promise<boolean> {
         const { chatId, inputData } = this.getChatIdAndInputData(msg);
-        if (this.process && this.checkAddCommands(inputData)) {
-            await this.sendMessage(chatId, 'Вы начали, но не завершили процесс создания или добавления. Пожалуйста, завершите его или отмените', {
-                reply_markup: {
-                    inline_keyboard: [
-                        [
-                            {
-                                text: 'Отменить',
-                                callback_data: 'cancel',
-                            },
+        if (this.process && this._checkAddCommands(inputData)) {
+            await this.sendMessage(
+                chatId,
+                'Вы начали, но не завершили процесс создания или добавления. Пожалуйста, завершите его или отмените',
+                {
+                    reply_markup: {
+                        inline_keyboard: [
+                            [
+                                {
+                                    text: 'Отменить',
+                                    callback_data: 'cancel',
+                                },
+                            ],
                         ],
-                    ],
-                },
-            });
+                    },
+                }
+            );
             return true;
         }
         return false;
     }
 
-    async cancelAllStarted(chatId: number) {
+    private async _cancelAllStarted(chatId: number) {
         this.artist.deleteStates(this, chatId);
 
         await this.sendMessage(chatId, 'Отмена');
     }
 
-    async listen() {
+    public async listen() {
         this.bot.onText(/.*/, async (msg) => {
             const { chatId, inputData } = this.getChatIdAndInputData(msg);
 
@@ -146,7 +155,7 @@ export default class Bot {
         this.bot.on('message', async (msg) => {
             const { chatId, inputData } = this.getChatIdAndInputData(msg);
 
-            if (this.checkAddCommands(inputData) || this.checkCommands(inputData)) {
+            if (this._checkAddCommands(inputData) || this._checkCommands(inputData)) {
                 return;
             }
 
@@ -164,7 +173,7 @@ export default class Bot {
             if (!chatId || !inputData) return;
 
             if (inputData === 'cancel') {
-                await this.cancelAllStarted(chatId);
+                await this._cancelAllStarted(chatId);
                 return;
             }
 
