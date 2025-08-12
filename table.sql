@@ -26,7 +26,7 @@ CREATE TABLE tasks(
 	name VARCHAR(50) NOT NULL,
 	type INTEGER NOT NULL,
 	status INTEGER NOT NULL,
-	executor INTEGER NOT NULL,
+	executor INTEGER REFERENCES artist(id),
 	priority INTEGER NOT NULL,
 	description VARCHAR(500) NOT NULL,
 	project INTEGER REFERENCES projects(id),
