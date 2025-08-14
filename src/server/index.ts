@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors';
 import { Pool } from 'pg';
 
 import projectRoutes from './routes/projects.routes';
@@ -14,6 +15,12 @@ class Server {
 
     run() {
         const app = express();
+
+        app.use(
+            cors({
+                origin: ['http://127.0.0.1:3000', 'http://localhost:3000'],
+            })
+        );
         app.use(express.json());
 
         app.use('/projects', projectRoutes);

@@ -12,6 +12,7 @@
         "migratedb": "node db/migrate.js"
     },
     "devDependencies": {
+        "@types/cors": "^2.8.19",
         "@types/express": "^5.0.3",
         "@types/node": "^24.0.10",
         "@types/node-telegram-bot-api": "^0.64.9",
@@ -21,6 +22,7 @@
         "typescript": "^5.8.3"
     },
     "dependencies": {
+        "cors": "^2.8.5",
         "express": "^5.1.0",
         "googleapis": "^150.0.1",
         "node-telegram-bot-api": "^0.66.0",
