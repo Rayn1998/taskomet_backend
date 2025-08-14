@@ -5,6 +5,8 @@ import Bot from './bot/bot.service';
 import Google from './google/google.service';
 import Artist from './artist/artist.service';
 
+import Server from './server/index';
+
 const telegramBot = new TelegramBot(botKey, { polling: true });
 const dataBasePool = new Pool(dbData);
 const google = new Google();
@@ -12,4 +14,6 @@ const artist = new Artist();
 
 const mmproBot = new Bot(telegramBot, dataBasePool, google, artist);
 
-export default mmproBot;
+const server = new Server(dataBasePool);
+
+export { mmproBot, server, dataBasePool };

@@ -1,3 +1,4 @@
-import mmproBot from "./app";
+import { mmproBot, server } from './app';
 
-mmproBot.init();
+// mmproBot.init();
+server.run();

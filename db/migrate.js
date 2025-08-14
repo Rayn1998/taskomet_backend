@@ -6,7 +6,7 @@ class Migrate {
         this.dataConfig = {
             user: 'postgres',
             host: 'localhost',
-            password: '1324',
+            password: 'postgresql',
             port: 5432,
         };
         this.pool = null;
@@ -29,13 +29,18 @@ class Migrate {
     }
 
     async recreateDb() {
-        const sysPool = new Pool({ ...this.dataConfig, database: "postgres" });
+        const sysPool = new Pool({ ...this.dataConfig, database: 'postgres' });
         const sysClient = await sysPool.connect();
 
         try {
+            await sysClient.query(`
+                SELECT pg_terminate_backend(pid)
+                FROM pg_stat_activity
+                WHERE datname = '${this.targetDB}' AND pid <> pg_backend_pid();
+            `);
             await sysClient.query(`DROP DATABASE IF EXISTS ${this.targetDB}`);
             await sysClient.query(`CREATE DATABASE ${this.targetDB}`);
-            console.log("Database recreated successfully");
+            console.log('Database recreated successfully');
         } catch (err) {
             console.error(err);
         } finally {
@@ -52,7 +57,7 @@ class Migrate {
                     name VARCHAR(50) NOT NULL,
                     role INTEGER NOT NULL,
                     tgId VARCHAR(50) NOT NULL
-                ); 
+                );
             `);
 
             await this.db.query(`
@@ -62,7 +67,7 @@ class Migrate {
                     status INTEGER NOT NULL,
                     description VARCHAR(1000),
                     priority INTEGER NOT NULL
-                );   
+                );
             `);
 
             await this.db.query(`
@@ -99,7 +104,7 @@ class Migrate {
                 );
             `);
 
-            console.log("Tables succsessfully created");
+            console.log('Tables succsessfully created');
         } catch (err) {
             console.error(err);
         }
@@ -109,10 +114,10 @@ class Migrate {
         try {
             await this.db.query(`
                 INSERT INTO projects(name, status, description, priority)
-                VALUES 
+                VALUES
                     ('Eterna', 0, 'fps - 24', 0),
                     ('HOL', 0, 'fps - 25', 0);
-            `)
+            `);
         } catch (err) {
             console.error(err);
         }
@@ -122,7 +127,7 @@ class Migrate {
         try {
             await this.db.query(`
                 INSERT INTO scenes(name, status, priority, project)
-                VALUES 
+                VALUES
                     ('SOC', 0, 0, 1),
                     ('BBQ', 0, 0, 1),
                     ('ABC', 0, 0, 2),
@@ -152,21 +157,23 @@ class Migrate {
 
     async addTaskData() {
         try {
-            await this.db.query(`
+            await this.db.query(
+                `
                 INSERT INTO task_data (task_id, text, created_at)
                 VALUES
                     (1, 'поправить скачок', $1),
                     (1, 'всё ещё есть дрыги по концу', $2),
                     (2, 'плывёт', $3),
                     (3, 'отлично, спасибо!', $4);
-                    
-            `, [new Date(), new Date(), new Date(), new Date()]);
+
+            `,
+                [new Date(), new Date(), new Date(), new Date()]
+            );
         } catch (err) {
             console.error(err);
         }
     }
 }
-
 
 const migrate = new Migrate('mmpro_tasks');
 await migrate.recreateDb();
