@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import { getProjects } from '../controllers/projects.controller';
-import { getScenes } from '../controllers/scenes.controller';
-import { getTasks } from '../controllers/tasks.controller';
+import { getProjects } from '@/server/controllers/projects.controller';
+import { getScenes } from '@/server/controllers/scenes.controller';
+import { getTasks } from '@/server/controllers/tasks.controller';
 
 const router = Router();
 

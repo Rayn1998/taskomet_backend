@@ -1,6 +1,6 @@
-import Bot from '../bot.service';
+import Bot from '@/bot/bot.service';
 import { Message } from 'node-telegram-bot-api';
-import { IArtist } from '../../types/IArtist';
+import IArtist from '@shared/types/Artist';
 
 export async function getTasks(bot: Bot, msg: Message) {
     try {
@@ -22,7 +22,7 @@ export async function getTasks(bot: Bot, msg: Message) {
             if (artistTasks.length !== 0) {
                 const tasksString = artistTasks.join('\n');
                 const message =
-                    `${artist.tgid}\nХэй, привет, ${artist.name}, на тебе сегодня следующие задачки) :\n\n`.concat(
+                    `${artist.tgId}\nХэй, привет, ${artist.name}, на тебе сегодня следующие задачки) :\n\n`.concat(
                         tasksString
                     );
                 await bot.sendMessage(msg.chat.id, message);

@@ -1,6 +1,6 @@
 import { Message, CallbackQuery } from 'node-telegram-bot-api';
-import Bot from '../bot/bot.service';
-import IArtist from './artist.interface';
+import Bot from '@/bot/bot.service';
+import IArtist from '@shared/types/Artist';
 
 export default class Artist {
     newArtistProcess: {

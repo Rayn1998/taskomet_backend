@@ -1,7 +1,13 @@
-import { Pool } from 'pg';
+import { Pool, PoolClient } from 'pg';
+import DBconfig from '@shared/types/DBconfig';
 
 class Migrate {
-    constructor(target_database) {
+    targetDB: string;
+    dataConfig: DBconfig;
+    pool!: Pool;
+    db!: PoolClient;
+
+    constructor(target_database: string) {
         this.targetDB = target_database;
         this.dataConfig = {
             user: 'postgres',
@@ -9,8 +15,6 @@ class Migrate {
             password: 'postgresql',
             port: 5432,
         };
-        this.pool = null;
-        this.db = null;
     }
 
     async connectToDb() {
@@ -175,20 +179,35 @@ class Migrate {
     }
 }
 
-const migrate = new Migrate('mmpro_tasks');
-await migrate.recreateDb();
-await migrate.connectToDb();
-await migrate.db.query('BEGIN');
-try {
-    await migrate.createTables();
-    await migrate.addProjects();
-    await migrate.addScenes();
-    await migrate.addTasks();
-    await migrate.addTaskData();
-    await migrate.db.query('COMMIT');
-} catch (err) {
-    await migrate.db.query('ROLLBACK');
-}
-await migrate.endConnection();
+async function migration() {
+    const migrate = new Migrate('mmpro_tasks');
 
-process.exit(0);
+    try {
+        await migrate.recreateDb();
+
+        await migrate.connectToDb();
+        await migrate.db.query('BEGIN');
+        try {
+            await migrate.createTables();
+            await migrate.addProjects();
+            await migrate.addScenes();
+            await migrate.addTasks();
+            await migrate.addTaskData();
+
+            await migrate.db.query('COMMIT');
+            console.log('Migration completed');
+        } catch (err) {
+            await migrate.db.query('ROLLBACK');
+            console.error('Migration failed, transaction rolled back', err);
+        }
+    } catch (err) {
+        console.error('Migration script failed', err);
+    } finally {
+        await migrate.endConnection();
+    }
+}
+
+migration().catch((err) => {
+    console.error('Error occured: ', err);
+    process.exit(1);
+});

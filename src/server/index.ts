@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import { Pool } from 'pg';
 
-import projectRoutes from './routes/projects.routes';
+import projectRoutes from '@/server/routes/projects.routes';
 
 class Server {
     db: Pool;

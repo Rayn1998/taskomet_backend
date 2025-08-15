@@ -6,10 +6,11 @@
     "author": "",
     "main": "index.js",
     "scripts": {
-        "start": "node ./dist/index.js",
+        "start": "node dist/index.js",
         "build": "tsc",
-        "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
-        "migratedb": "node db/migrate.js"
+        "buildAndStart": "tsc && node dist/index.js",
+        "dev": "tsnd --respawn -T -r tsconfig-paths/register src/index.ts",
+        "migratedb": "tsnd -T src/db/migrate.js"
     },
     "devDependencies": {
         "@types/cors": "^2.8.19",
@@ -19,6 +20,7 @@
         "@types/pg": "^8.15.4",
         "ts-node": "^10.9.2",
         "ts-node-dev": "^2.0.0",
+        "tsconfig-paths": "^4.2.0",
         "typescript": "^5.8.3"
     },
     "dependencies": {

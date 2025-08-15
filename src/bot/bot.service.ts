@@ -1,11 +1,11 @@
 import TelegramBot, { Message, CallbackQuery, CopyMessageOptions } from 'node-telegram-bot-api';
 import { Pool } from 'pg';
-import Google from '../google/google.service';
-import Artist from '../artist/artist.service';
+import Google from '@/google/google.service';
+import Artist from '@/artist/artist.service';
 
-import { isMessage, isCallbackQuery } from '../typeguards/typeguards';
-import { commands, commandHandlers } from './handlers/commands';
-import { botAddCommands, botCommands } from './bot.commands';
+import { isMessage, isCallbackQuery } from '@/typeguards/typeguards';
+import { commands, commandHandlers } from '@/bot/handlers/commands';
+import { botAddCommands, botCommands } from '@/bot/bot.commands';
 
 export default class Bot {
     bot: TelegramBot;

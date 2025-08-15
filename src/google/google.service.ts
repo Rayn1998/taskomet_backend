@@ -1,9 +1,8 @@
 import { Auth, google, sheets_v4 } from 'googleapis';
 import { join } from 'path';
-import { readFile } from 'fs/promises';
-import { spreadsheetId } from '../constant';
+import { spreadsheetId } from '@/constant';
 
-const credentials = join(__dirname, '../..', 'credentials.json');
+const credentials = join(__dirname, '@/..', 'credentials.json');
 
 export default class Google {
     private auth: null | Auth.GoogleAuth;

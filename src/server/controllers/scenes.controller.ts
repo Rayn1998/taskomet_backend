@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import * as scenesService from '../services/scenes.service';
+import * as scenesService from '@/server/services/scenes.service';
 
 export async function getScenes(req: Request, res: Response) {
     const { projectId } = req.params;

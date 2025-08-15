@@ -1,4 +1,4 @@
-import { dataBasePool } from '../../app';
+import dataBasePool from '@/db/db';
 
 export async function getAll(projectId: string) {
     return (

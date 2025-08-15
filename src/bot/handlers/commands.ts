@@ -1,7 +1,7 @@
-import Bot from '../bot.service';
+import Bot from '@/bot/bot.service';
 import { Message } from 'node-telegram-bot-api';
 
-import { getTasks } from '../functions/functions';
+import { getTasks } from '@/bot/functions/functions';
 
 export const commandHandlers = new Map<string, (bot: Bot, msg: Message) => Promise<void>>();
 
