@@ -1,42 +1,31 @@
 CREATE TABLE artist (
-	id SERIAL PRIMARY KEY NOT NULL,
-	name VARCHAR(50) NOT NULL,
-	role INTEGER NOT NULL,
-	tgId VARCHAR(50) NOT NULL
+ id SERIAL PRIMARY KEY NOT NULL,
+ name VARCHAR(50) NOT NULL,
+ role INT NOT NULL,
+ tgId VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE tasks(
+ id SERIAL PRIMARY KEY NOT NULL,
+ priority INTEGER NOT NULL,
+ executor INTEGER NOT NULL,
+ description VARCHAR(500) NOT NULL,
+ project INT NOT NULL,
+ scene VARCHAR(50) NOT NULL,
+ status INTEGER NOT NULL,
+ shot VARCHAR(50) NOT NULL,
+ notified BOOLEAN NOT NULL,
 );
 
 CREATE TABLE projects(
 	id SERIAL PRIMARY KEY,
 	name VARCHAR(50) NOT NULL,
-	status INTEGER NOT NULL,
-	description VARCHAR(1000),
-	priority INTEGER NOT NULL
+	description VARCHAR(1000)
 );
 
-CREATE TABLE scenes(
-	id SERIAL PRIMARY KEY,
-	name VARCHAR(50) NOT NULL,
-	status INTEGER NOT NULL,
-	priority INTEGER NOT NULL,
-	project INTEGER REFERENCES projects(id)
-);
-
-CREATE TABLE tasks(
-	id SERIAL PRIMARY KEY NOT NULL,
-	name VARCHAR(50) NOT NULL,
-	type INTEGER NOT NULL,
-	status INTEGER NOT NULL,
-	executor INTEGER REFERENCES artist(id),
-	priority INTEGER NOT NULL,
-	description VARCHAR(500) NOT NULL,
-	project INTEGER REFERENCES projects(id),
-	scene INTEGER REFERENCES scenes(id)
-);
-
-CREATE TABLE task_data(
+CREATE TABLE comments(
 	id SERIAL PRIMARY KEY,
 	task_id INTEGER REFERENCES tasks(id),
 	text VARCHAR(500) NOT NULL,
-	created_at TIMESTAMP NOT NULL,
-	created_by INTEGER REFERENCES artist(id)
-);
+	created_at TIMESTAMP NOT NULL
+)

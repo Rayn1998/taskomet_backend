@@ -1,8 +1,8 @@
-import express, { Request, Response, NextFunction } from 'express';
-import cors from 'cors';
-import { Pool } from 'pg';
-import { ApiError } from './error/ApiError';
-import projectRoutes from '@/server/routes/projects.routes';
+import express, { Request, Response, NextFunction } from "express";
+import cors from "cors";
+import { Pool } from "pg";
+import projectRoutes from "@/server/routes/projects.routes";
+import { errorHandler } from "./error/errorHandler";
 
 class Server {
     db: Pool;
@@ -18,16 +18,14 @@ class Server {
 
         app.use(
             cors({
-                origin: ['http://127.0.0.1:3000', 'http://localhost:3000'],
-            })
+                origin: ["http://127.0.0.1:3000", "http://localhost:3000"],
+            }),
         );
         app.use(express.json());
 
-        app.use('/projects', projectRoutes);
+        app.use("/projects", projectRoutes);
 
-        app.use('/*path', (err: ApiError, req: Request, res: Response, next: NextFunction) => {
-            res.status(err.status).send({ message: err.message, details: err.details });
-        });
+        app.use(errorHandler);
 
         app.listen(this.port, () => {
             console.log(`Server started to listen on ${this.port} port`);

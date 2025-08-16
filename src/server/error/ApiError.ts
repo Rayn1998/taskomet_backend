@@ -1,10 +1,20 @@
 export class ApiError extends Error {
     status: number;
-    details?: any;
 
-    constructor(status: number, message: string, details?: any) {
+    constructor(status: number, message: string) {
         super(message);
         this.status = status;
-        this.details = details;
+    }
+
+    static badRequest(msg: string) {
+        return new ApiError(400, msg);
+    }
+
+    static notFound(msg: string) {
+        return new ApiError(404, msg);
+    }
+
+    static internalError(msg: string) {
+        return new ApiError(500, msg);
     }
 }
