@@ -2,7 +2,10 @@ import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import { Pool } from "pg";
 import projectRoutes from "@/server/routes/projects.routes";
-import { errorHandler } from "./error/errorHandler";
+import taskDataRoutes from "@/server/routes/task-data.routes";
+import { errorHandler } from "@/server/error/errorHandler";
+
+import { checkServerConnection } from "@/server/controllers/check-server.controller";
 
 class Server {
     db: Pool;
@@ -24,6 +27,8 @@ class Server {
         app.use(express.json());
 
         app.use("/projects", projectRoutes);
+        app.use("/task-data", taskDataRoutes);
+        app.use("/check-server", checkServerConnection);
 
         app.use(errorHandler);
 

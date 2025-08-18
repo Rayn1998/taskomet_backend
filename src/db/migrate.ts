@@ -1,4 +1,4 @@
-import { Pool, PoolClient } from 'pg';
+import { Pool, PoolClient, DatabaseError } from 'pg';
 import DBconfig from '@shared/types/DBconfig';
 
 class Migrate {
@@ -23,7 +23,15 @@ class Migrate {
             this.pool = pool;
             this.db = await this.pool.connect();
         } catch (err) {
-            console.error(err);
+            if (err instanceof DatabaseError) {
+                if (err.code === '28P01') {
+                    console.log("Incorrect password to db");
+                }
+                process.exit(1);
+            } else {
+                console.error(err);
+                process.exit(1);
+            }
         }
     }
 
