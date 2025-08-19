@@ -12,9 +12,7 @@ export function errorHandler(
 
     if (err instanceof ApiError) {
         return res.status(err.status).json({
-            error: {
-                message: err.message,
-            },
+            message: err.message,
         });
     }
 
