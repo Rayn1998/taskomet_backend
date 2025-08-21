@@ -4,6 +4,7 @@ import { Pool } from "pg";
 import projectRoutes from "@/server/routes/projects.routes";
 import taskDataRoutes from "@/server/routes/task-data.routes";
 import { errorHandler } from "@/server/error/errorHandler";
+import { getArtists } from "@/server/controllers/artists.controller";
 
 import { checkServerConnection } from "@/server/controllers/check-server.controller";
 
@@ -29,6 +30,7 @@ class Server {
         app.use("/projects", projectRoutes);
         app.use("/task-data", taskDataRoutes);
         app.use("/check-server", checkServerConnection);
+        app.use("/get-artist", getArtists);
 
         app.use(errorHandler);
 

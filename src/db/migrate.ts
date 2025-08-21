@@ -1,5 +1,5 @@
-import { Pool, PoolClient, DatabaseError } from 'pg';
-import DBconfig from '@shared/types/DBconfig';
+import { Pool, PoolClient, DatabaseError } from "pg";
+import DBconfig from "@shared/types/DBconfig";
 
 class Migrate {
     targetDB: string;
@@ -10,21 +10,24 @@ class Migrate {
     constructor(target_database: string) {
         this.targetDB = target_database;
         this.dataConfig = {
-            user: 'postgres',
-            host: 'localhost',
-            password: 'postgresql',
+            user: "postgres",
+            host: "localhost",
+            password: "postgresql",
             port: 5432,
         };
     }
 
     async connectToDb() {
         try {
-            const pool = await new Pool({ ...this.dataConfig, database: this.targetDB });
+            const pool = await new Pool({
+                ...this.dataConfig,
+                database: this.targetDB,
+            });
             this.pool = pool;
             this.db = await this.pool.connect();
         } catch (err) {
             if (err instanceof DatabaseError) {
-                if (err.code === '28P01') {
+                if (err.code === "28P01") {
                     console.log("Incorrect password to db");
                 }
                 process.exit(1);
@@ -41,7 +44,7 @@ class Migrate {
     }
 
     async recreateDb() {
-        const sysPool = new Pool({ ...this.dataConfig, database: 'postgres' });
+        const sysPool = new Pool({ ...this.dataConfig, database: "postgres" });
         const sysClient = await sysPool.connect();
 
         try {
@@ -52,7 +55,7 @@ class Migrate {
             `);
             await sysClient.query(`DROP DATABASE IF EXISTS ${this.targetDB}`);
             await sysClient.query(`CREATE DATABASE ${this.targetDB}`);
-            console.log('Database recreated successfully');
+            console.log("Database recreated successfully");
         } catch (err) {
             console.error(err);
         } finally {
@@ -116,7 +119,7 @@ class Migrate {
                 );
             `);
 
-            console.log('Tables succsessfully created');
+            console.log("Tables succsessfully created");
         } catch (err) {
             console.error(err);
         }
@@ -153,14 +156,14 @@ class Migrate {
     async addTasks() {
         try {
             await this.db.query(`
-                INSERT INTO tasks (name, type, status, priority, description, project, scene)
+                INSERT INTO tasks (name, type, status, executor, priority, description, project, scene)
                 VALUES
-                    ('SOC_0010', 0, 0, 0, 'Трек камеры, добавить пол', 1, 1),
-                    ('SOC_0020', 0, 0, 0, 'Камера, добавить гео зеркала', 1, 1),
-                    ('BBQ_0450', 0, 0, 0, 'Трек барбекю)', 1, 2),
-                    ('BBQ_1085', 0, 0, 0, 'Трек бла-бла)', 1, 2),
-                    ('ABC_1982', 0, 0, 0, 'Трек)', 2, 3),
-                    ('DEF_0001', 0, 0, 0, 'Трек алфавитов', 2, 4);
+                    ('SOC_0010', 0, 0, 3, 0, 'Трек камеры, добавить пол', 1, 1),
+                    ('SOC_0020', 0, 0, 2, 0, 'Камера, добавить гео зеркала', 1, 1),
+                    ('BBQ_0450', 0, 0, 1, 0, 'Трек барбекю)', 1, 2),
+                    ('BBQ_1085', 0, 0, 4, 0, 'Трек бла-бла)', 1, 2),
+                    ('ABC_1982', 0, 0, 1, 0, 'Трек)', 2, 3),
+                    ('DEF_0001', 0, 0, 1, 0, 'Трек алфавитов', 2, 4);
             `);
         } catch (err) {
             console.error(err);
@@ -179,8 +182,23 @@ class Migrate {
                     (3, 'отлично, спасибо!', $4);
 
             `,
-                [new Date(), new Date(), new Date(), new Date()]
+                [new Date(), new Date(), new Date(), new Date()],
             );
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    async addArtists() {
+        try {
+            await this.db.query(`
+            INSERT INTO artist (name, role, tgid)
+            VALUES 
+                ('Yuriy Bodolanov', 10, 'bodolanov'),
+                ('Vladimir Korneytsev', 2, 'vvmpro'),
+                ('Tim Popov', 0, 'timpopov'),
+                ('Anna', 1, 'anna');
+            `);
         } catch (err) {
             console.error(err);
         }
@@ -188,34 +206,35 @@ class Migrate {
 }
 
 async function migration() {
-    const migrate = new Migrate('mmpro_tasks');
+    const migrate = new Migrate("mmpro_tasks");
 
     try {
         await migrate.recreateDb();
 
         await migrate.connectToDb();
-        await migrate.db.query('BEGIN');
+        await migrate.db.query("BEGIN");
         try {
             await migrate.createTables();
+            await migrate.addArtists();
             await migrate.addProjects();
             await migrate.addScenes();
             await migrate.addTasks();
             await migrate.addTaskData();
 
-            await migrate.db.query('COMMIT');
-            console.log('Migration completed');
+            await migrate.db.query("COMMIT");
+            console.log("Migration completed");
         } catch (err) {
-            await migrate.db.query('ROLLBACK');
-            console.error('Migration failed, transaction rolled back', err);
+            await migrate.db.query("ROLLBACK");
+            console.error("Migration failed, transaction rolled back", err);
         }
     } catch (err) {
-        console.error('Migration script failed', err);
+        console.error("Migration script failed", err);
     } finally {
         await migrate.endConnection();
     }
 }
 
 migration().catch((err) => {
-    console.error('Error occured: ', err);
+    console.error("Error occured: ", err);
     process.exit(1);
 });
