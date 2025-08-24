@@ -9,6 +9,7 @@ import { getArtists } from "@/server/controllers/artists.controller";
 import { checkServerConnection } from "@/server/controllers/check-server.controller";
 import {
     updateTaskExecutor,
+    updateTaskPriority,
     updateTaskStatus,
 } from "./controllers/tasks.controller";
 
@@ -38,6 +39,7 @@ class Server {
 
         app.patch("/task-update-executor", updateTaskExecutor);
         app.patch("/task-update-status", updateTaskStatus);
+        app.patch("/task-update-priority", updateTaskPriority);
 
         app.use(errorHandler);
 

@@ -43,3 +43,17 @@ export async function updateTaskStatus(
         next(err);
     }
 }
+
+export async function updateTaskPriority(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) {
+    const { taskId, priority } = req.body;
+    try {
+        const update = await tasksService.updatePriority(taskId, priority);
+        if (update) res.json(priority);
+    } catch (err) {
+        next(err);
+    }
+}

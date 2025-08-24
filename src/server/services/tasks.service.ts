@@ -38,3 +38,14 @@ export async function updateStatus(taskId: number, status: number) {
         [status, taskId],
     );
 }
+
+export async function updatePriority(taskId: number, pirority: number) {
+    return await dataBasePool.query(
+        `
+            UPDATE tasks
+            SET priority = $1
+            WHERE id = $2;
+        `,
+        [pirority, taskId],
+    );
+}
