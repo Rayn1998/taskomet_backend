@@ -3,6 +3,7 @@ import cors from "cors";
 import { Pool } from "pg";
 import projectRoutes from "@/server/routes/projects.routes";
 import taskDataRoutes from "@/server/routes/task-data.routes";
+import { getTaskData } from "./controllers/task-data.controller";
 import { errorHandler } from "@/server/error/errorHandler";
 import { getArtists } from "@/server/controllers/artists.controller";
 
@@ -33,7 +34,7 @@ class Server {
         app.use(express.json());
 
         app.use("/projects", projectRoutes);
-        app.use("/task-data", taskDataRoutes);
+        app.use("/task-data", getTaskData);
         app.use("/check-server", checkServerConnection);
         app.use("/get-artist", getArtists);
 

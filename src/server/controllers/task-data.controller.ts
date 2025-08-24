@@ -6,10 +6,10 @@ export async function getTaskData(
     res: Response,
     next: NextFunction,
 ) {
-    const { taskId } = req.body;
+    const { id } = req.query;
 
     try {
-        const taskData = await taskDataService.getTaskData(taskId);
+        const taskData = await taskDataService.getTaskData(Number(id));
         res.json(taskData);
     } catch (err) {
         next(err);
