@@ -7,6 +7,10 @@ import { errorHandler } from "@/server/error/errorHandler";
 import { getArtists } from "@/server/controllers/artists.controller";
 
 import { checkServerConnection } from "@/server/controllers/check-server.controller";
+import {
+    updateTaskExecutor,
+    updateTaskStatus,
+} from "./controllers/tasks.controller";
 
 class Server {
     db: Pool;
@@ -31,6 +35,9 @@ class Server {
         app.use("/task-data", taskDataRoutes);
         app.use("/check-server", checkServerConnection);
         app.use("/get-artist", getArtists);
+
+        app.patch("/task-update-executor", updateTaskExecutor);
+        app.patch("/task-update-status", updateTaskStatus);
 
         app.use(errorHandler);
 
