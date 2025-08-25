@@ -13,3 +13,17 @@ export async function getArtists(
         next(err);
     }
 }
+
+export async function createArtist(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) {
+    try {
+        const { name, role, tgid } = req.body;
+        const newArtist = await artistService.createArtist(name, role, tgid);
+        res.json(newArtist);
+    } catch (err) {
+        next(err);
+    }
+}
