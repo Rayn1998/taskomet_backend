@@ -174,12 +174,12 @@ class Migrate {
         try {
             await this.db.query(
                 `
-                INSERT INTO task_data (task_id, text, created_at)
+                INSERT INTO task_data (task_id, text, created_at, created_by)
                 VALUES
-                    (1, 'поправить скачок', $1),
-                    (1, 'всё ещё есть дрыги по концу', $2),
-                    (2, 'плывёт', $3),
-                    (3, 'отлично, спасибо!', $4);
+                    (1, 'поправить скачок', $1, 1),
+                    (1, 'всё ещё есть дрыги по концу', $2, 3),
+                    (2, 'плывёт', $3, 2),
+                    (3, 'отлично, спасибо!', $4, 1);
 
             `,
                 [new Date(), new Date(), new Date(), new Date()],
