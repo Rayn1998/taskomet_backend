@@ -17,6 +17,24 @@ export async function getAll(projectId: string, sceneId: string) {
     ).rows;
 }
 
+export async function createTask(
+    name: string,
+    description: string,
+    projectId: number,
+    sceneId: number,
+) {
+    return (
+        await dataBasePool.query(
+            `
+        INSERT INTO tasks (name, description, project, scene, type, status, priority)
+        VALUES ($1, $2, $3, $4, 0, 0, 0)
+        RETURNING *;
+    `,
+            [name, description, projectId, sceneId],
+        )
+    ).rows;
+}
+
 export async function updateExecutor(taskId: number, executorId: number) {
     return await dataBasePool.query(
         `

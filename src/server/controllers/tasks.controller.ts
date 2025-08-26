@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import * as tasksService from "@/server/services/tasks.service";
+import dataBasePool from "@/db/db";
 
 export async function getTasks(
     req: Request,
@@ -12,6 +13,42 @@ export async function getTasks(
         const tasks = await tasksService.getAll(projectId, sceneId);
         res.json(tasks);
     } catch (err) {
+        next(err);
+    }
+}
+
+export async function createTask(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) {
+    const { projectName, sceneName } = req.params;
+    const { name, description } = req.body;
+
+    try {
+        await dataBasePool.query("BEGIN");
+
+        const projectId = (
+            await dataBasePool.query(
+                `SELECT * FROM projects WHERE LOWER(name) = '${projectName}'`,
+            )
+        ).rows[0].id;
+        const sceneId = (
+            await dataBasePool.query(
+                `SELECT * FROM scenes WHERE LOWER(name) = '${sceneName}'`,
+            )
+        ).rows[0].id;
+
+        const newTask = await tasksService.createTask(
+            name,
+            description,
+            projectId,
+            sceneId,
+        );
+        dataBasePool.query("COMMIT");
+        res.json(newTask);
+    } catch (err) {
+        dataBasePool.query("ROLLBACK");
         next(err);
     }
 }
