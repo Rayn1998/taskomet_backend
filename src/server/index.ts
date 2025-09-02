@@ -2,7 +2,6 @@ import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import { Pool } from "pg";
 import projectRoutes from "@/server/routes/projects.routes";
-import taskDataRoutes from "@/server/routes/task-data.routes";
 import { getTaskData } from "./controllers/task-data.controller";
 import { errorHandler } from "@/server/error/errorHandler";
 import {
@@ -15,6 +14,7 @@ import {
     updateTaskExecutor,
     updateTaskPriority,
     updateTaskStatus,
+    deleteTask,
 } from "./controllers/tasks.controller";
 
 class Server {
@@ -41,6 +41,7 @@ class Server {
         app.use("/check-server", checkServerConnection);
         app.get("/get-artist", getArtists);
         app.post("/create-artist", createArtist);
+        app.delete("/delete-task", deleteTask);
 
         app.patch("/task-update-executor", updateTaskExecutor);
         app.patch("/task-update-status", updateTaskStatus);

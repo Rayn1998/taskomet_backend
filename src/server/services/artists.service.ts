@@ -14,5 +14,5 @@ export async function createArtist(name: string, role: number, tgid: string) {
         `,
         [name, role, tgid],
     );
-    return result.rows;
+    return result.rows[0];
 }

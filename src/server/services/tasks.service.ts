@@ -32,7 +32,18 @@ export async function createTask(
     `,
             [name, description, projectId, sceneId],
         )
-    ).rows;
+    ).rows[0];
+}
+
+export async function deleteTask(id: number) {
+    return await dataBasePool.query(
+        `
+        DELETE FROM tasks
+        WHERE id = $1
+        RETURNING *;
+    `,
+        [id],
+    );
 }
 
 export async function updateExecutor(taskId: number, executorId: number) {

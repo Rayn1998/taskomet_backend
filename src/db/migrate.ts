@@ -90,6 +90,7 @@ class Migrate {
                     id SERIAL PRIMARY KEY,
                     name VARCHAR(50) NOT NULL,
                     status INTEGER NOT NULL,
+                    description VARCHAR(1000),
                     priority INTEGER NOT NULL,
                     project INTEGER REFERENCES projects(id)
                 );
@@ -141,12 +142,12 @@ class Migrate {
     async addScenes() {
         try {
             await this.db.query(`
-                INSERT INTO scenes(name, status, priority, project)
+                INSERT INTO scenes(name, status, priority, project, description)
                 VALUES
-                    ('SOC', 0, 0, 1),
-                    ('BBQ', 0, 0, 1),
-                    ('ABC', 0, 0, 2),
-                    ('DEF', 0, 0, 2);
+                    ('SOC', 0, 0, 1, 'в этой сцене в основном трек запястий'),
+                    ('BBQ', 0, 0, 1, 'трек головы главного героя'),
+                    ('ABC', 0, 0, 2, 'трек камеры, плейны на домики'),
+                    ('DEF', 0, 0, 2, 'камера, обджект трек автомобиля');
             `);
         } catch (err) {
             console.error(err);
@@ -158,12 +159,12 @@ class Migrate {
             await this.db.query(`
                 INSERT INTO tasks (name, type, status, executor, priority, description, project, scene)
                 VALUES
-                    ('SOC_0010', 0, 0, 3, 0, 'Трек камеры, добавить пол', 1, 1),
-                    ('SOC_0020', 0, 0, 2, 0, 'Камера, добавить гео зеркала', 1, 1),
-                    ('BBQ_0450', 0, 0, 1, 0, 'Трек барбекю)', 1, 2),
-                    ('BBQ_1085', 0, 0, 4, 0, 'Трек бла-бла)', 1, 2),
-                    ('ABC_1982', 0, 0, 1, 0, 'Трек)', 2, 3),
-                    ('DEF_0001', 0, 0, 1, 0, 'Трек алфавитов', 2, 4);
+                    ('0010', 0, 0, 3, 0, 'Трек камеры, добавить пол', 1, 1),
+                    ('0020', 0, 0, 2, 0, 'Камера, добавить гео зеркала', 1, 1),
+                    ('0450', 0, 0, 1, 0, 'Трек барбекю)', 1, 2),
+                    ('1085', 0, 0, 4, 0, 'Трек бла-бла)', 1, 2),
+                    ('1982', 0, 0, 1, 0, 'Трек)', 2, 3),
+                    ('0001', 0, 0, 1, 0, 'Трек алфавитов', 2, 4);
             `);
         } catch (err) {
             console.error(err);

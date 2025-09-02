@@ -53,6 +53,21 @@ export async function createTask(
     }
 }
 
+export async function deleteTask(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) {
+    const { id } = req.body;
+
+    try {
+        const deleted = await tasksService.deleteTask(id);
+        res.json(deleted.rows[0]);
+    } catch (err) {
+        next(err);
+    }
+}
+
 export async function updateTaskExecutor(
     req: Request,
     res: Response,
