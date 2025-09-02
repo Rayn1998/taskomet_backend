@@ -28,7 +28,7 @@ export async function createTask(
     try {
         await dataBasePool.query("BEGIN");
 
-        const projectId = (
+        const projectId: number = (
             await dataBasePool.query(
                 `SELECT * FROM projects WHERE LOWER(name) = '${projectName}'`,
             )

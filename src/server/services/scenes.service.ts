@@ -12,3 +12,19 @@ export async function getAll(projectId: string) {
     );
     return result.rows;
 }
+
+export async function createScene(
+    name: string,
+    projectId: number,
+    description: string,
+) {
+    const result = await dataBasePool.query(
+        `
+        INSERT INTO scenes(name, status, priority, project, description)
+        VALUES ($1, 0, 0, $2, $3)
+        RETURNING *;
+    `,
+        [name, projectId, description],
+    );
+    return result.rows[0];
+}
