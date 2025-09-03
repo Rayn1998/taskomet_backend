@@ -30,3 +30,17 @@ export async function createProject(
         next(err);
     }
 }
+
+export async function deleteProject(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) {
+    try {
+        const { projectId } = req.params;
+        await projectService.deleteProject(Number(projectId));
+        res.sendStatus(204);
+    } catch (err) {
+        next(err);
+    }
+}

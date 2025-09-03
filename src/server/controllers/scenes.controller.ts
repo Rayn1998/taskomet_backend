@@ -46,3 +46,17 @@ export async function createScene(
         next(err);
     }
 }
+
+export async function deleteScene(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) {
+    try {
+        const { sceneId } = req.params;
+        await scenesService.deleteScene(Number(sceneId));
+        res.sendStatus(204);
+    } catch (err) {
+        next(err);
+    }
+}

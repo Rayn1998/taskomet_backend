@@ -28,3 +28,9 @@ export async function createScene(
     );
     return result.rows[0];
 }
+
+export async function deleteScene(sceneId: number) {
+    return await dataBasePool.query(`DELETE FROM scenes WHERE id = $1`, [
+        sceneId,
+    ]);
+}
