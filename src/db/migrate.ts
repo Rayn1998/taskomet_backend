@@ -113,7 +113,7 @@ class Migrate {
             await this.db.query(`
                 CREATE TABLE task_data(
                     id SERIAL PRIMARY KEY,
-                    task_id INTEGER REFERENCES tasks(id),
+                    task_id INTEGER REFERENCES tasks(id) ON DELETE CASCADE,
                     text VARCHAR(500) NOT NULL,
                     created_at TIMESTAMP NOT NULL,
                     created_by INTEGER REFERENCES artist(id)
