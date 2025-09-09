@@ -1,5 +1,5 @@
-import express from "express";
-import multer from "multer";
+import express, { Request, Response, NextFunction } from "express";
+import { multerInstance } from "@/server/utils/multer";
 import cors from "cors";
 import { Pool } from "pg";
 import projectRoutes from "@/server/routes/projects.routes";
@@ -17,18 +17,6 @@ import {
     updateTaskPriority,
     deleteTask,
 } from "./controllers/tasks.controller";
-
-// MULTER TEST
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, "./uploads");
-    },
-    filename: function (req, file, cb) {
-        cb(null, file.originalname);
-    },
-});
-const upload = multer({ storage });
-///////////////////////////////////////////
 
 class Server {
     db: Pool;
@@ -56,9 +44,14 @@ class Server {
         app.post("/create-artist", createArtist);
         app.delete("/delete-task", deleteTask);
 
-        app.post("/task-upload", upload.single("image"), (req, res) => {
-            res.send("Upload successfully");
-        });
+        app.post(
+            "/task-upload",
+            multerInstance.single("data"),
+            (err: unknown, req: Request, res: Response, next: NextFunction) => {
+                if (err) next(err);
+                res.send("Upload successfully");
+            },
+        );
 
         app.patch("/task-update-executor", updateTaskExecutor);
         app.patch("/task-update-status", updateTaskStatus);
