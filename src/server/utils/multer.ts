@@ -8,7 +8,7 @@ const storage = multer.diskStorage({
         const path = await checkFolders();
         cb(null, path);
     },
-    filename: function (req, file, cb) {
+    filename: async function (req, file, cb) {
         const extension = file.originalname.split(".").slice(-1)[0];
         const hexCode = randomBytes(4).toString("hex");
         const newName = hexCode + "." + extension;

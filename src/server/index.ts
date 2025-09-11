@@ -1,9 +1,9 @@
-import express, { Request, Response, NextFunction } from "express";
-import { multerInstance } from "@/server/utils/multer";
+import express from "express";
+
 import cors from "cors";
 import { Pool } from "pg";
 import projectRoutes from "@/server/routes/projects.routes";
-import { getTaskData } from "./controllers/task-data.controller";
+import taskRoutes from "@/server/routes/task.routes";
 import { errorHandler } from "@/server/error/errorHandler";
 import {
     getArtists,
@@ -11,12 +11,6 @@ import {
 } from "@/server/controllers/artists.controller";
 
 import { checkServerConnection } from "@/server/controllers/check-server.controller";
-import {
-    updateTaskExecutor,
-    updateTaskStatus,
-    updateTaskPriority,
-    deleteTask,
-} from "./controllers/tasks.controller";
 
 class Server {
     db: Pool;
@@ -38,24 +32,10 @@ class Server {
         app.use(express.json());
 
         app.use("/projects", projectRoutes);
-        app.use("/task-data", getTaskData);
+        app.use("/task", taskRoutes);
         app.use("/check-server", checkServerConnection);
         app.get("/get-artist", getArtists);
         app.post("/create-artist", createArtist);
-        app.delete("/delete-task", deleteTask);
-
-        app.post(
-            "/task-upload",
-            multerInstance.single("data"),
-            (err: unknown, req: Request, res: Response, next: NextFunction) => {
-                if (err) next(err);
-                res.send("Upload successfully");
-            },
-        );
-
-        app.patch("/task-update-executor", updateTaskExecutor);
-        app.patch("/task-update-status", updateTaskStatus);
-        app.patch("/task-update-priority", updateTaskPriority);
 
         app.use(errorHandler);
 
