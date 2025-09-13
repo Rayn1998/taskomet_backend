@@ -1,4 +1,6 @@
 import { Pool, PoolClient, DatabaseError } from "pg";
+import { rm, access } from "fs/promises";
+import { join } from "path";
 import DBconfig from "@shared/types/DBconfig";
 
 class Migrate {
@@ -118,7 +120,9 @@ class Migrate {
                     text VARCHAR(500),
                     media VARCHAR(100),
                     created_at TIMESTAMP NOT NULL,
-                    created_by INTEGER REFERENCES artist(id) NOT NULL
+                    created_by INTEGER REFERENCES artist(id) NOT NULL,
+                    status INTEGER,
+                    spent_hours NUMERIC(4, 1)
                 );
             `);
 
@@ -177,12 +181,12 @@ class Migrate {
         try {
             await this.db.query(
                 `
-                INSERT INTO task_data (task_id, text, created_at, created_by, type)
+                INSERT INTO task_data (task_id, text, created_at, created_by, type, status, spent_hours)
                 VALUES
-                    (1, 'поправить скачок', $1, 1, 1),
-                    (1, 'всё ещё есть дрыги по концу', $2, 3, 1),
-                    (2, 'плывёт', $3, 2, 1),
-                    (3, 'отлично, спасибо!', $4, 1, 1);
+                    (1, 'поправить скачок', $1, 1, 1, 3, 1),
+                    (1, 'всё ещё есть дрыги по концу', $2, 3, 1, 3, 3),
+                    (2, 'плывёт', $3, 2, 1, 3, 1.5),
+                    (3, 'отлично, спасибо!', $4, 1, 1, 5, 3.5);
 
             `,
                 [new Date(), new Date(), new Date(), new Date()],
@@ -208,10 +212,22 @@ class Migrate {
     }
 }
 
+async function removeUploads() {
+    try {
+        const uploadsPath = join(process.cwd(), "uploads");
+        const exist = await access(uploadsPath);
+        if (typeof exist === "undefined")
+            return await rm(uploadsPath, { recursive: true });
+    } catch (err) {
+        console.error(err);
+    }
+}
+
 async function migration() {
     const migrate = new Migrate("mmpro_tasks");
 
     try {
+        await removeUploads();
         await migrate.recreateDb();
 
         await migrate.connectToDb();
@@ -232,12 +248,11 @@ async function migration() {
         }
     } catch (err) {
         console.error("Migration script failed", err);
+        process.exit(1);
     } finally {
         await migrate.endConnection();
+        process.exit(0);
     }
 }
 
-migration().catch((err) => {
-    console.error("Error occured: ", err);
-    process.exit(1);
-});
+migration();

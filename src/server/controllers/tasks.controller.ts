@@ -1,6 +1,10 @@
 import { NextFunction, Request, Response } from "express";
 import * as tasksService from "@/server/services/tasks.service";
+import * as taskDataService from "@/server/services/task-data.service";
 import dataBasePool from "@/db/db";
+
+// TYPES
+import { TaskDataMin } from "@shared/types/TaskData";
 
 export async function getTasks(
     req: Request,
@@ -87,10 +91,16 @@ export async function updateTaskStatus(
     res: Response,
     next: NextFunction,
 ) {
-    const { taskId, status } = req.body;
+    const { taskData }: { taskData: TaskDataMin } = req.body;
     try {
-        const update = await tasksService.updateStatus(taskId, status);
-        if (update) res.json(status);
+        const update = await tasksService.updateStatus(
+            taskData.task_id,
+            taskData.status,
+        );
+        const updateStatusTaskData = await taskDataService.addUpdateStatus(
+            taskData,
+        );
+        if (update && updateStatusTaskData) res.json(updateStatusTaskData);
     } catch (err) {
         next(err);
     }
