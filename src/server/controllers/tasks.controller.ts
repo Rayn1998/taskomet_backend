@@ -10,7 +10,7 @@ export async function getTasks(
     const { projectId, sceneId } = req.params;
 
     try {
-        const tasks = await tasksService.getAll(projectId, sceneId);
+        const tasks = await tasksService.getTasks(projectId, sceneId);
         res.json(tasks);
     } catch (err) {
         next(err);
@@ -62,7 +62,7 @@ export async function deleteTask(
 
     try {
         const deleted = await tasksService.deleteTask(id);
-        res.json(deleted.rows[0]);
+        res.json(deleted);
     } catch (err) {
         next(err);
     }

@@ -1,6 +1,11 @@
 import dataBasePool from "@/db/db";
 
-export async function getAll(projectId: string, sceneId: string) {
+import ITask from "@shared/types/Task";
+
+export async function getTasks(
+    projectId: string,
+    sceneId: string,
+): Promise<ITask[]> {
     return (
         await dataBasePool.query(
             `
@@ -22,7 +27,7 @@ export async function createTask(
     description: string,
     projectId: number,
     sceneId: number,
-) {
+): Promise<ITask> {
     return (
         await dataBasePool.query(
             `
@@ -35,15 +40,17 @@ export async function createTask(
     ).rows[0];
 }
 
-export async function deleteTask(id: number) {
-    return await dataBasePool.query(
-        `
+export async function deleteTask(id: number): Promise<ITask> {
+    return (
+        await dataBasePool.query(
+            `
         DELETE FROM tasks
         WHERE id = $1
         RETURNING *;
     `,
-        [id],
-    );
+            [id],
+        )
+    ).rows[0];
 }
 
 export async function updateExecutor(taskId: number, executorId: number) {

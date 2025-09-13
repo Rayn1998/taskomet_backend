@@ -115,10 +115,10 @@ class Migrate {
                     id SERIAL PRIMARY KEY,
                     type INTEGER NOT NULL,
                     task_id INTEGER REFERENCES tasks(id) ON DELETE CASCADE,
-                    text VARCHAR(500) NOT NULL,
+                    text VARCHAR(500),
                     media VARCHAR(100),
                     created_at TIMESTAMP NOT NULL,
-                    created_by INTEGER REFERENCES artist(id)
+                    created_by INTEGER REFERENCES artist(id) NOT NULL
                 );
             `);
 
@@ -179,10 +179,10 @@ class Migrate {
                 `
                 INSERT INTO task_data (task_id, text, created_at, created_by, type)
                 VALUES
-                    (1, 'поправить скачок', $1, 1, 0),
-                    (1, 'всё ещё есть дрыги по концу', $2, 3, 0),
-                    (2, 'плывёт', $3, 2, 0),
-                    (3, 'отлично, спасибо!', $4, 1, 0);
+                    (1, 'поправить скачок', $1, 1, 1),
+                    (1, 'всё ещё есть дрыги по концу', $2, 3, 1),
+                    (2, 'плывёт', $3, 2, 1),
+                    (3, 'отлично, спасибо!', $4, 1, 1);
 
             `,
                 [new Date(), new Date(), new Date(), new Date()],

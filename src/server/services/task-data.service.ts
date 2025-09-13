@@ -1,6 +1,7 @@
 import dataBasePool from "@/db/db";
+import ITaskData from "@shared/types/TaskData";
 
-export async function getTaskData(taskId: number) {
+export async function getTaskData(taskId: number): Promise<ITaskData[]> {
     return (
         await dataBasePool.query(
             `
@@ -12,4 +13,18 @@ export async function getTaskData(taskId: number) {
             [taskId],
         )
     ).rows;
+}
+
+export async function addDailies(newTaskData: ITaskData): Promise<ITaskData> {
+    const { type, task_id, text, media, created_at, created_by } = newTaskData;
+    return (
+        await dataBasePool.query(
+            `
+            INSERT INTO task_data (type, task_id, text, media, created_by, created_at)
+            VALUES ($1, $2, $3, $4, $5, $6)
+            RETURNING *;
+            `,
+            [type, task_id, text, media, created_by, created_at],
+        )
+    ).rows[0];
 }

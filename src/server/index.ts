@@ -1,4 +1,5 @@
 import express from "express";
+import { join } from "path";
 
 import cors from "cors";
 import { Pool } from "pg";
@@ -31,6 +32,9 @@ class Server {
         );
         app.use(express.json());
 
+        const uploadsPath = join(process.cwd(), "uploads");
+        app.use("/uploads", express.static(uploadsPath));
+        console.log("Serving uploads from:", uploadsPath);
         app.use("/projects", projectRoutes);
         app.use("/task", taskRoutes);
         app.use("/check-server", checkServerConnection);
