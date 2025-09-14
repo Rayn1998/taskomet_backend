@@ -1,3 +1,4 @@
+import * as fs from "fs/promises";
 import { NextFunction, Request, Response } from "express";
 import * as tasksService from "@/server/services/tasks.service";
 import * as taskDataService from "@/server/services/task-data.service";
@@ -65,6 +66,10 @@ export async function deleteTask(
     const { id } = req.body;
 
     try {
+        const taskData = await taskDataService.getTaskData(id);
+        for (const data of taskData) {
+            if (data.media) fs.rm(data.media);
+        }
         const deleted = await tasksService.deleteTask(id);
         res.json(deleted);
     } catch (err) {

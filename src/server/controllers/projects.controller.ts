@@ -1,5 +1,12 @@
+import * as fs from "fs/promises";
 import { NextFunction, Request, Response } from "express";
 import * as projectService from "@/server/services/projects.service";
+import * as scenesService from "@/server/services/scenes.service";
+import dataBasePool from "@/db/db";
+
+import ITask from "@shared/types/Task";
+import ITaskData from "@shared/types/TaskData";
+import IScene from "@shared/types/Scene";
 
 export async function getProjects(
     req: Request,
@@ -38,9 +45,39 @@ export async function deleteProject(
 ) {
     try {
         const { projectId } = req.params;
+
+        await dataBasePool.query("BEGIN");
+
+        const sceneIds = (
+            await dataBasePool.query(
+                `SELECT * FROM scenes WHERE project = $1;`,
+                [projectId],
+            )
+        ).rows.map((scene) => scene.id);
+
+        const taskIds = (
+            await dataBasePool.query(
+                `SELECT * FROM tasks WHERE scene = ANY($1::int[]);`,
+                [sceneIds],
+            )
+        ).rows.map((task) => task.id);
+
+        const taskData: ITaskData[] = (
+            await dataBasePool.query(
+                `SELECT * FROM task_data WHERE task_id = ANY($1::int[]);`,
+                [taskIds],
+            )
+        ).rows;
+
+        for (const data of taskData) {
+            if (data.media) await fs.rm(data.media);
+        }
+
         await projectService.deleteProject(Number(projectId));
+        await dataBasePool.query("COMMIT");
         res.sendStatus(204);
     } catch (err) {
+        await dataBasePool.query("ROLLBACK");
         next(err);
     }
 }

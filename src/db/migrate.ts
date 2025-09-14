@@ -94,7 +94,7 @@ class Migrate {
                     status INTEGER NOT NULL,
                     description VARCHAR(1000),
                     priority INTEGER NOT NULL,
-                    project INTEGER REFERENCES projects(id)
+                    project INTEGER REFERENCES projects(id) ON DELETE CASCADE
                 );
             `);
 
@@ -107,8 +107,8 @@ class Migrate {
                     executor INTEGER REFERENCES artist(id),
                     priority INTEGER NOT NULL,
                     description VARCHAR(500) NOT NULL,
-                    project INTEGER REFERENCES projects(id),
-                    scene INTEGER REFERENCES scenes(id)
+                    project INTEGER REFERENCES projects(id) ON DELETE CASCADE,
+                    scene INTEGER REFERENCES scenes(id) ON DELETE CASCADE
                 );
             `);
 
@@ -165,9 +165,9 @@ class Migrate {
             await this.db.query(`
                 INSERT INTO tasks (name, type, status, executor, priority, description, project, scene)
                 VALUES
-                    ('0010', 0, 0, 3, 0, 'Трек камеры, добавить пол', 1, 1),
-                    ('0020', 0, 0, 2, 0, 'Камера, добавить гео зеркала', 1, 1),
-                    ('0450', 0, 0, 1, 0, 'Трек барбекю)', 1, 2),
+                    ('0010', 0, 3, 3, 0, 'Трек камеры, добавить пол', 1, 1),
+                    ('0020', 0, 3, 2, 0, 'Камера, добавить гео зеркала', 1, 1),
+                    ('0450', 0, 5, 1, 0, 'Трек барбекю)', 1, 2),
                     ('1085', 0, 0, 4, 0, 'Трек бла-бла)', 1, 2),
                     ('1982', 0, 0, 1, 0, 'Трек)', 2, 3),
                     ('0001', 0, 0, 1, 0, 'Трек алфавитов', 2, 4);

@@ -16,4 +16,6 @@ const storage = multer.diskStorage({
     },
 });
 
-export const multerInstance = multer({ storage });
+export const multerInstance = multer({
+    storage,
+});

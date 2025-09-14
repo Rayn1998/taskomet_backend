@@ -1,5 +1,6 @@
 import dataBasePool from "@/db/db";
 import ITaskData, { TaskDataMin } from "@shared/types/TaskData";
+import { updateStatus } from "./tasks.service";
 
 export async function getTaskData(taskId: number): Promise<ITaskData[]> {
     return (
@@ -15,16 +16,53 @@ export async function getTaskData(taskId: number): Promise<ITaskData[]> {
     ).rows;
 }
 
-export async function addDailies(newTaskData: ITaskData): Promise<ITaskData> {
-    const { type, task_id, text, media, created_at, created_by } = newTaskData;
+export async function addComment(newTaskData: ITaskData): Promise<ITaskData> {
+    const { type, task_id, text, media, created_at, created_by, status } =
+        newTaskData;
+    if (media) {
+        await dataBasePool.query("BEGIN");
+        await updateStatus(task_id, status);
+        const res = (
+            await dataBasePool.query(
+                `
+                    INSERT INTO task_data (type, task_id, text, media, created_by, created_at, status)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7)
+                    RETURNING *;
+                    `,
+                [type, task_id, text, media, created_by, created_at, status],
+            )
+        ).rows[0];
+        await dataBasePool.query("COMMIT");
+
+        return res;
+    } else {
+        await dataBasePool.query("BEGIN");
+        await updateStatus(task_id, status);
+        const res = (
+            await dataBasePool.query(
+                `
+                    INSERT INTO task_data (type, task_id, text, created_by, created_at, status)
+                    VALUES ($1, $2, $3, $4, $5, $6)
+                    RETURNING *;
+                    `,
+                [type, task_id, text, created_by, created_at, status],
+            )
+        ).rows[0];
+        await dataBasePool.query("COMMIT");
+
+        return res;
+    }
+}
+
+export async function deleteComment(commentId: number): Promise<ITaskData> {
     return (
         await dataBasePool.query(
             `
-            INSERT INTO task_data (type, task_id, text, media, created_by, created_at)
-            VALUES ($1, $2, $3, $4, $5, $6)
-            RETURNING *;
-            `,
-            [type, task_id, text, media, created_by, created_at],
+        DELETE FROM task_data
+        WHERE id = $1
+        RETURNING *;
+        `,
+            [commentId],
         )
     ).rows[0];
 }

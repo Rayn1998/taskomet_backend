@@ -2,7 +2,8 @@ import { Router } from "express";
 
 import {
     getTaskData,
-    addDailies,
+    addComment,
+    deleteComment,
 } from "@/server/controllers/task-data.controller";
 import {
     updateTaskExecutor,
@@ -20,6 +21,7 @@ router.patch("/task-update-priority", updateTaskPriority);
 router.delete("/delete-task", deleteTask);
 
 router.get("/task-data", getTaskData);
-router.post("/task-dailies", multerInstance.single("file"), addDailies);
+router.post("/task-comment", multerInstance.single("file"), addComment);
+router.delete("/task-comment/:id", deleteComment);
 
 export default router;
