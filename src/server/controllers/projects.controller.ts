@@ -1,12 +1,9 @@
 import * as fs from "fs/promises";
 import { NextFunction, Request, Response } from "express";
 import * as projectService from "@/server/services/projects.service";
-import * as scenesService from "@/server/services/scenes.service";
 import dataBasePool from "@/db/db";
 
-import ITask from "@shared/types/Task";
 import ITaskData from "@shared/types/TaskData";
-import IScene from "@shared/types/Scene";
 
 export async function getProjects(
     req: Request,

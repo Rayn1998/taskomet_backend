@@ -1,20 +1,25 @@
 import dataBasePool from "@/db/db";
 
-export async function getAll() {
-    const result = await dataBasePool.query("SELECT * FROM projects");
-    return result.rows;
+import IProject from "@shared/types/Project";
+
+export async function getAll(): Promise<IProject[]> {
+    return (await dataBasePool.query("SELECT * FROM projects")).rows;
 }
 
-export async function createProject(name: string, description: string) {
-    const result = await dataBasePool.query(
-        `
+export async function createProject(
+    name: string,
+    description: string,
+): Promise<IProject> {
+    return (
+        await dataBasePool.query(
+            `
         INSERT INTO projects(name, status, description, priority)
         VALUES ($1, 0, $2, 0)
         RETURNING *;
         `,
-        [name, description],
-    );
-    return result.rows[0];
+            [name, description],
+        )
+    ).rows[0];
 }
 
 export async function deleteProject(projectId: number) {

@@ -10,7 +10,8 @@
         "build": "tsc",
         "buildAndStart": "tsc && node dist/index.js",
         "dev": "tsnd --respawn -T -r tsconfig-paths/register src/index.ts",
-        "migratedb": "tsnd -T src/db/migrate.ts"
+        "migratedb": "tsnd -T src/db/migrate.ts",
+        "test": "vitest run"
     },
     "devDependencies": {
         "@types/cors": "^2.8.19",
@@ -23,7 +24,8 @@
         "ts-node": "^10.9.2",
         "ts-node-dev": "^2.0.0",
         "tsconfig-paths": "^4.2.0",
-        "typescript": "^5.8.3"
+        "typescript": "^5.8.3",
+        "vitest": "^3.2.4"
     },
     "dependencies": {
         "cors": "^2.8.5",

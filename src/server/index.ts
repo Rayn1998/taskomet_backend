@@ -27,7 +27,11 @@ class Server {
 
         app.use(
             cors({
-                origin: ["http://127.0.0.1:3000", "http://localhost:3000"],
+                origin: [
+                    "http://127.0.0.1:3000",
+                    "http://localhost:3000",
+                    // "https://2c9b355a6d10.ngrok-free.app",
+                ],
             }),
         );
         app.use(express.json());
@@ -40,6 +44,18 @@ class Server {
         app.use("/check-server", checkServerConnection);
         app.get("/get-artist", getArtists);
         app.post("/create-artist", createArtist);
+
+        app.get("/download/:folder/:filename", (req, res, next) => {
+            const { folder, filename } = req.params;
+
+            const filePath = join(process.cwd(), "uploads", folder, filename);
+
+            res.download(filePath, filename, (err) => {
+                if (err) {
+                    next(err);
+                }
+            });
+        });
 
         app.use(errorHandler);
 

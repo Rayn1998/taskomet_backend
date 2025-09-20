@@ -9,14 +9,30 @@ export async function getTasks(
     return (
         await dataBasePool.query(
             `
-        SELECT t.*, p.name AS project_nane, s.name AS scene_name
+        SELECT 
+            t.id,
+            t.name,
+            t.type,
+            t.status,
+            t.executor,
+            t.priority,
+            t.description,
+            t.project,
+            t.scene,
+            p.name AS project_name,
+            s.name AS scene_name,
+            SUM(td.spent_hours) AS spent_hours
         FROM tasks t
+        LEFT JOIN task_data td ON t.id = td.task_id
         JOIN projects p ON t.project = p.id
         JOIN scenes s ON t.scene = s.id
-        WHERE LOWER(p.name) = $1
-        AND LOWER(s.name) = $2
+        WHERE LOWER(p.name) = LOWER($1)
+        AND LOWER(s.name) = LOWER($2)
+        GROUP BY 
+            t.id, t.name, t.type, t.status, t.executor, t.priority, t.description, t.project, t.scene,
+            p.name, s.name
         ORDER BY t.id;
-    `,
+        `,
             [projectId, sceneId],
         )
     ).rows;

@@ -33,7 +33,10 @@ export async function addComment(
     try {
         if (req.file) {
             const newName = randomBytes(4).toString("hex");
-            const ext = req.file.originalname.split(".").slice(-1)[0];
+            const ext = req.file.originalname
+                .split(".")
+                .slice(-1)[0]
+                .toLowerCase();
 
             if (ext === "mp4" || ext === "mov") {
                 const fullPath = join(req.file.destination, newName + ".mp4");
@@ -79,7 +82,9 @@ export async function addComment(
                 next(new Error("Ошибка добавления комментария"));
             }
         }
-    } catch (err) {}
+    } catch (err) {
+        next(err);
+    }
 }
 
 export async function deleteComment(
