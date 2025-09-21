@@ -58,11 +58,19 @@ export async function addComment(newTaskData: ITaskData): Promise<ITaskData> {
         const res = (
             await dataBasePool.query(
                 `
-                    INSERT INTO task_data (type, task_id, text, created_by, created_at, status)
-                    VALUES ($1, $2, $3, $4, $5, $6)
+                    INSERT INTO task_data (type, task_id, text, created_by, created_at, status, spent_hours)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7)
                     RETURNING *;
                     `,
-                [type, task_id, text, created_by, created_at, status],
+                [
+                    type,
+                    task_id,
+                    text,
+                    created_by,
+                    created_at,
+                    status,
+                    spent_hours,
+                ],
             )
         ).rows[0];
         await dataBasePool.query("COMMIT");

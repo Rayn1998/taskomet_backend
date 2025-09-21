@@ -10,7 +10,10 @@ describe("artists controller", () => {
     } as any;
     const mockNext = vi.fn();
 
-    afterEach(() => vi.clearAllMocks());
+    afterEach(() => {
+        vi.clearAllMocks();
+        vi.resetAllMocks();
+    });
 
     it("getArtists: должен вернуть список артистов", async () => {
         const fakeArtists: IArtist[] = [
@@ -60,9 +63,9 @@ describe("artists controller", () => {
         expect(mockNext).not.toHaveBeenCalled();
     });
 
-    it("createArtist: пустой body", async () => {
+    it("createArtist: должен пробросить ошибку DB в next", async () => {
         const mockReq = {
-            body: {},
+            body: { name: "Yuriy", role: 10, tgid: "bodolanov" },
         } as any;
 
         const error = new Error("DB error");
@@ -75,18 +78,17 @@ describe("artists controller", () => {
         expect(mockRes.json).not.toHaveBeenCalled();
     });
 
-    it("createArtist: должен пробросить ошибку в next", async () => {
+    it("createArtist: пришёл пустой body - error", async () => {
         const mockReq = {
-            body: { name: "Yuriy Bodolanov", role: 10, tgid: "bodolanov" },
+            body: {},
         } as any;
 
-        const error = new Error("DB error");
-
-        vi.spyOn(artistService, "createArtist").mockRejectedValue(error);
+        vi.spyOn(artistService, "createArtist");
 
         await artistController.createArtist(mockReq, mockRes, mockNext);
 
-        expect(mockNext).toHaveBeenCalledWith(error);
+        expect(artistService.createArtist).not.toHaveBeenCalled();
+        expect(mockNext).toHaveBeenCalled();
         expect(mockRes.json).not.toHaveBeenCalled();
     });
 });

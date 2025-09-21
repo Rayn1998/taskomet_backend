@@ -25,6 +25,9 @@ export async function createProject(
 ) {
     try {
         const { name, description } = req.body;
+
+        if (!name) throw new Error("Name is not provided");
+
         const newProject = await projectService.createProject(
             name,
             description,
@@ -42,6 +45,8 @@ export async function deleteProject(
 ) {
     try {
         const { projectId } = req.params;
+
+        if (!projectId) throw new Error("Project id not provided");
 
         await dataBasePool.query("BEGIN");
 

@@ -23,6 +23,9 @@ export async function createArtist(
 ) {
     try {
         const { name, role, tgid } = req.body;
+
+        if (!name) throw new Error("Necessary data not provided");
+
         const newArtist: IArtist = await artistService.createArtist(
             name,
             role,

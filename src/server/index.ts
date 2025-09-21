@@ -10,7 +10,7 @@ import {
     getArtists,
     createArtist,
 } from "@/server/controllers/artists.controller";
-
+import { getMyTasks } from "@/server/controllers/tasks.controller";
 import { checkServerConnection } from "@/server/controllers/check-server.controller";
 
 class Server {
@@ -40,6 +40,7 @@ class Server {
         app.use("/uploads", express.static(uploadsPath));
         console.log("Serving uploads from:", uploadsPath);
         app.use("/projects", projectRoutes);
+        app.use("/my-tasks/:executorId", getMyTasks);
         app.use("/task", taskRoutes);
         app.use("/check-server", checkServerConnection);
         app.get("/get-artist", getArtists);

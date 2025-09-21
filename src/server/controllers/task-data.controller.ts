@@ -96,7 +96,7 @@ export async function deleteComment(
 
     try {
         const deleted = await taskDataService.deleteComment(+id);
-        if (deleted.media !== null) {
+        if (deleted.media && deleted.media !== null) {
             fs.rm(deleted.media);
         }
         if (deleted) res.sendStatus(200);

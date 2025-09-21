@@ -124,3 +124,17 @@ export async function updateTaskPriority(
         next(err);
     }
 }
+
+export async function getMyTasks(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) {
+    const { executorId } = req.params;
+    try {
+        const tasks = await tasksService.getMyTasks(Number(executorId));
+        res.json(tasks);
+    } catch (err) {
+        next(err);
+    }
+}

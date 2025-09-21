@@ -88,6 +88,17 @@ class Migrate {
             `);
 
             await this.db.query(`
+                CREATE TABLE project_data(
+                    id SERIAL PRIMARY KEY,
+                    project_id INTEGER REFERENCES projects(id) ON DELETE CASCADE,
+                    text VARCHAR(500),
+                    media VARCHAR(100),
+                    created_at TIMESTAMP NOT NULL,
+                    created_by INTEGER REFERENCES artist(id) NOT NULL
+                );
+            `);
+
+            await this.db.query(`
                 CREATE TABLE scenes(
                     id SERIAL PRIMARY KEY,
                     name VARCHAR(50) NOT NULL,
@@ -95,6 +106,17 @@ class Migrate {
                     description VARCHAR(1000),
                     priority INTEGER NOT NULL,
                     project INTEGER REFERENCES projects(id) ON DELETE CASCADE
+                );
+            `);
+
+            await this.db.query(`
+                CREATE TABLE scene_data(
+                    id SERIAL PRIMARY KEY,
+                    scene_id INTEGER REFERENCES scenes(id) ON DELETE CASCADE,
+                    text VARCHAR(500),
+                    media VARCHAR(100),
+                    created_at TIMESTAMP NOT NULL,
+                    created_by INTEGER REFERENCES artist(id) NOT NULL
                 );
             `);
 
