@@ -13,7 +13,8 @@ export async function getTaskData(
     res: Response,
     next: NextFunction,
 ) {
-    const { id } = req.query;
+    const { id } = req.query ?? {};
+    if (!id) return next(new Error("No necessary data provided: id"));
 
     try {
         const taskData = await taskDataService.getTaskData(Number(id));
@@ -29,6 +30,7 @@ export async function addComment(
     next: NextFunction,
 ) {
     const data = JSON.parse(req.body.data);
+    if (!data) return next(new Error("No necessary data provided"));
 
     try {
         if (req.file) {
@@ -92,7 +94,8 @@ export async function deleteComment(
     res: Response,
     next: NextFunction,
 ) {
-    const { id } = req.params;
+    const { id } = req.params ?? {};
+    if (!id) return next(new Error("No necessary data provided: id"));
 
     try {
         const deleted = await taskDataService.deleteComment(+id);

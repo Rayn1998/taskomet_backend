@@ -4,9 +4,7 @@ import * as scenesService from "@/server/services/scenes.service";
 import * as fs from "fs/promises";
 
 vi.mock("fs/promises", () => {
-    return {
-        rm: vi.fn().mockResolvedValue(undefined),
-    };
+    return { rm: vi.fn().mockResolvedValue(undefined) };
 });
 
 // TYPES
