@@ -10,7 +10,10 @@ export async function getScenes(
     res: Response,
     next: NextFunction,
 ) {
-    const { projectId } = req.params;
+    const { projectId } = req.params ?? {};
+    if (!projectId)
+        return next(new Error("No necessary data provided: projectId"));
+
     try {
         const scenes = await scenesService.getAll(projectId);
         res.json(scenes);
@@ -24,15 +27,21 @@ export async function createScene(
     res: Response,
     next: NextFunction,
 ) {
-    const { name, description } = req.body;
-    const { projectName } = req.params;
+    const { name, description } = req.body ?? {};
+    const { projectName } = req.params ?? {};
+
+    if (!name || !projectName)
+        return next(
+            new Error("No necessary data provided: projectName or name"),
+        );
 
     try {
         await dataBasePool.query("BEGIN");
 
         const projectId: number = (
             await dataBasePool.query(
-                `SELECT * FROM projects WHERE LOWER(name) = '${projectName}'`,
+                `SELECT id FROM projects WHERE LOWER(name) = $1`,
+                [projectName],
             )
         ).rows[0].id;
 
@@ -55,9 +64,10 @@ export async function deleteScene(
     res: Response,
     next: NextFunction,
 ) {
-    try {
-        const { sceneId } = req.params;
+    const { sceneId } = req.params ?? {};
+    if (!sceneId) return next(new Error("No necessary data provided: sceneId"));
 
+    try {
         await dataBasePool.query("BEGIN");
 
         const tasks: ITask[] = (

@@ -23,11 +23,10 @@ export async function createProject(
     res: Response,
     next: NextFunction,
 ) {
+    const { name, description } = req.body ?? {};
+    if (!name) return next(new Error("Name is not provided: name"));
+
     try {
-        const { name, description } = req.body;
-
-        if (!name) throw new Error("Name is not provided");
-
         const newProject = await projectService.createProject(
             name,
             description,
@@ -43,11 +42,11 @@ export async function deleteProject(
     res: Response,
     next: NextFunction,
 ) {
+    const { projectId } = req.params ?? {};
+    if (!projectId)
+        return next(new Error("Project id not provided: projectId"));
+
     try {
-        const { projectId } = req.params;
-
-        if (!projectId) throw new Error("Project id not provided");
-
         await dataBasePool.query("BEGIN");
 
         const sceneIds = (

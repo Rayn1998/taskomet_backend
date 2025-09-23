@@ -72,8 +72,9 @@ class Migrate {
                 CREATE TABLE artist (
                     id SERIAL PRIMARY KEY NOT NULL,
                     name VARCHAR(50) NOT NULL,
+                    user_name VARCHAR(50) NOT NULL,
                     role INTEGER NOT NULL,
-                    tgId VARCHAR(50) NOT NULL
+                    photo_url VARCHAR(100)
                 );
             `);
 
@@ -221,13 +222,15 @@ class Migrate {
     async addArtists() {
         try {
             await this.db.query(`
-            INSERT INTO artist (name, role, tgid)
+            INSERT INTO artist (name, user_name, role, photo_url)
             VALUES 
-                ('Yuriy Bodolanov', 10, 'bodolanov'),
+                ('Yuriy Bodolanov', 'bodolanov', 10, 'blob:https://web.telegram.org/976fe224-43df-4c79-bb6e-1ea02f1b4737');
+            `);
+            /*
                 ('Vladimir Korneytsev', 2, 'vvmpro'),
                 ('Tim Popov', 0, 'timpopov'),
                 ('Anna', 1, 'anna');
-            `);
+            */
         } catch (err) {
             console.error(err);
         }
@@ -256,11 +259,11 @@ async function migration() {
         await migrate.db.query("BEGIN");
         try {
             await migrate.createTables();
-            await migrate.addArtists();
+            // await migrate.addArtists();
             await migrate.addProjects();
             await migrate.addScenes();
-            await migrate.addTasks();
-            await migrate.addTaskData();
+            // await migrate.addTasks();
+            // await migrate.addTaskData();
 
             await migrate.db.query("COMMIT");
             console.log("Migration completed");

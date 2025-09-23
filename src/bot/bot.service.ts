@@ -1,29 +1,33 @@
-import TelegramBot, { Message, CallbackQuery, CopyMessageOptions } from 'node-telegram-bot-api';
-import { Pool } from 'pg';
-import Google from '@/google/google.service';
-import Artist from '@/artist/artist.service';
+import TelegramBot, {
+    Message,
+    CallbackQuery,
+    CopyMessageOptions,
+} from "node-telegram-bot-api";
+import { Pool } from "pg";
+import Google from "@/google/google.service";
+import Artist from "@/artist/artist.service";
 
-import { isMessage, isCallbackQuery } from '@/typeguards/typeguards';
-import { commands, commandHandlers } from '@/bot/handlers/commands';
-import { botAddCommands, botCommands } from '@/bot/bot.commands';
+import { isMessage, isCallbackQuery } from "@/typeguards/typeguards";
+import { commands, commandHandlers } from "@/bot/handlers/commands";
+import { botAddCommands, botCommands } from "@/bot/bot.commands";
 
 export default class Bot {
     bot: TelegramBot;
     db: Pool;
     artist: Artist;
-    google: Google;
+    // google: Google;
     process: boolean;
 
     constructor(
         botInstance: TelegramBot,
         dbInstance: Pool,
-        googleInstance: Google,
-        artistInstance: Artist
+        // googleInstance: Google,
+        artistInstance: Artist,
     ) {
         this.bot = botInstance;
         this.db = dbInstance;
         this.artist = artistInstance;
-        this.google = googleInstance;
+        // this.google = googleInstance;
         this.process = false;
     }
 
@@ -31,19 +35,19 @@ export default class Bot {
         try {
             const dbConnection = await this._connectToDb();
             const commandsStatus = await this._setCommands();
-            const googleConnection = await this.google.init();
+            // const googleConnection = await this.google.init();
 
-            if (!dbConnection || !commandsStatus || !googleConnection) {
+            if (!dbConnection || !commandsStatus) {
                 throw new Error("Something doesn't work, check");
             }
 
-            console.log('Bot started to work');
+            console.log("Bot started to work");
             await this.listen();
         } catch (err) {
             if (err instanceof Error) {
                 console.error(err.message);
             } else {
-                console.error('An unknown error occurred');
+                console.error("An unknown error occurred");
             }
         }
     }
@@ -52,7 +56,7 @@ export default class Bot {
         try {
             const connection = await this.db.connect();
             if (connection) {
-                console.log('DataBase connection established');
+                console.log("DataBase connection established");
             }
             return true;
         } catch (err) {
@@ -66,7 +70,7 @@ export default class Bot {
             await this.bot.setMyCommands(commands);
             return true;
         } catch (err) {
-            console.error('Ошибка при установке команд: ', err);
+            console.error("Ошибка при установке команд: ", err);
             return false;
         }
     }
@@ -76,7 +80,7 @@ export default class Bot {
         inputData: string;
     } {
         let chatId = 0;
-        let inputData = '';
+        let inputData = "";
 
         if (isMessage(msg)) {
             chatId = msg.chat.id;
@@ -105,7 +109,11 @@ export default class Bot {
         }
     }
 
-    public async sendMessage(chatId: number, message: string, options?: CopyMessageOptions) {
+    public async sendMessage(
+        chatId: number,
+        message: string,
+        options?: CopyMessageOptions,
+    ) {
         try {
             await this.bot.sendMessage(chatId, message, options);
         } catch (err) {
@@ -113,24 +121,26 @@ export default class Bot {
         }
     }
 
-    public async checkInSomeProcess(msg: Message | CallbackQuery): Promise<boolean> {
+    public async checkInSomeProcess(
+        msg: Message | CallbackQuery,
+    ): Promise<boolean> {
         const { chatId, inputData } = this.getChatIdAndInputData(msg);
         if (this.process && this._checkAddCommands(inputData)) {
             await this.sendMessage(
                 chatId,
-                'Вы начали, но не завершили процесс создания или добавления. Пожалуйста, завершите его или отмените',
+                "Вы начали, но не завершили процесс создания или добавления. Пожалуйста, завершите его или отмените",
                 {
                     reply_markup: {
                         inline_keyboard: [
                             [
                                 {
-                                    text: 'Отменить',
-                                    callback_data: 'cancel',
+                                    text: "Отменить",
+                                    callback_data: "cancel",
                                 },
                             ],
                         ],
                     },
-                }
+                },
             );
             return true;
         }
@@ -140,7 +150,7 @@ export default class Bot {
     private async _cancelAllStarted(chatId: number) {
         this.artist.deleteStates(this, chatId);
 
-        await this.sendMessage(chatId, 'Отмена');
+        await this.sendMessage(chatId, "Отмена");
     }
 
     public async listen() {
@@ -152,10 +162,13 @@ export default class Bot {
             }
         });
 
-        this.bot.on('message', async (msg) => {
+        this.bot.on("message", async (msg) => {
             const { chatId, inputData } = this.getChatIdAndInputData(msg);
 
-            if (this._checkAddCommands(inputData) || this._checkCommands(inputData)) {
+            if (
+                this._checkAddCommands(inputData) ||
+                this._checkCommands(inputData)
+            ) {
                 return;
             }
 
@@ -167,12 +180,12 @@ export default class Bot {
             }
         });
 
-        this.bot.on('callback_query', async (query) => {
+        this.bot.on("callback_query", async (query) => {
             const { chatId, inputData } = this.getChatIdAndInputData(query);
 
             if (!chatId || !inputData) return;
 
-            if (inputData === 'cancel') {
+            if (inputData === "cancel") {
                 await this._cancelAllStarted(chatId);
                 return;
             }

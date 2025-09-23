@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import * as projectsController from "@/server/controllers/projects.controller";
 import * as projectsService from "@/server/services/projects.service";
+import dataBasePool from "@/db/db";
 
 import IProject from "@shared/types/Project";
 
@@ -11,7 +12,6 @@ describe("projects controller", () => {
 
     afterEach(() => {
         vi.clearAllMocks();
-        vi.resetAllMocks();
     });
 
     it("getProjects: должен вернуть список проектов", async () => {
@@ -36,7 +36,7 @@ describe("projects controller", () => {
 
     it("getProjects: должен пробросить ошибку в next", async () => {
         const error = new Error("DB error");
-        const mockReq = { body: {} } as any;
+
         vi.spyOn(projectsService, "getAll").mockRejectedValue(error);
 
         await projectsController.getProjects(mockReq, mockRes, mockNext);
@@ -90,15 +90,35 @@ describe("projects controller", () => {
     });
 
     it("deleteProject: success", async () => {
-        const mockReq = { params: { projectId: 1 } } as any;
+        const mockReq = { params: { projectId: "1" } } as any;
         const mockRes = { sendStatus: vi.fn() } as any;
 
-        vi.spyOn(projectsService, "deleteProject");
+        vi.spyOn(projectsService, "deleteProject").mockResolvedValue({
+            rowCount: 1,
+        } as any);
+
+        vi.spyOn(dataBasePool, "query").mockImplementation(
+            async (sql, args) => {
+                // console.log("DB QUERY: ", sql, args);
+
+                if (sql.startsWith("BEGIN")) return {};
+                if (sql.startsWith("SELECT * FROM scenes"))
+                    return { rows: [{ id: 1 }, { id: 2 }] };
+                if (sql.startsWith("SELECT * FROM tasks"))
+                    return { rows: [{ id: 1 }] };
+                if (sql.startsWith("SELECT * FROM task_data"))
+                    return { rows: [] };
+                if (sql.startsWith("COMMIT")) return {};
+
+                throw new Error(`Unexpected query in test: ${sql}`);
+            },
+        );
 
         await projectsController.deleteProject(mockReq, mockRes, mockNext);
 
         expect(projectsService.deleteProject).toHaveBeenCalledWith(1);
-        expect(mockRes.sendStatus).toHaveBeenCalled();
+        expect(mockRes.sendStatus).toHaveBeenCalledWith(204);
+        expect(mockNext).not.toHaveBeenCalled();
     });
 
     it("deleteProject: нет projectId - error", async () => {
@@ -106,11 +126,13 @@ describe("projects controller", () => {
         const mockRes = { sendStatus: vi.fn() } as any;
 
         vi.spyOn(projectsService, "deleteProject");
+        vi.spyOn(dataBasePool, "query");
 
         await projectsController.deleteProject(mockReq, mockRes, mockNext);
 
         expect(projectsService.deleteProject).not.toHaveBeenCalled();
         expect(mockRes.sendStatus).not.toHaveBeenCalled();
+        expect(dataBasePool.query).not.toHaveBeenCalled();
         expect(mockNext).toHaveBeenCalled();
     });
 });

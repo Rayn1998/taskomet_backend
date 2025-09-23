@@ -8,6 +8,7 @@ import taskRoutes from "@/server/routes/task.routes";
 import { errorHandler } from "@/server/error/errorHandler";
 import {
     getArtists,
+    getArtist,
     createArtist,
 } from "@/server/controllers/artists.controller";
 import { getMyTasks } from "@/server/controllers/tasks.controller";
@@ -30,7 +31,7 @@ class Server {
                 origin: [
                     "http://127.0.0.1:3000",
                     "http://localhost:3000",
-                    // "https://2c9b355a6d10.ngrok-free.app",
+                    "https://c8dfe975c0ce.ngrok-free.app",
                 ],
             }),
         );
@@ -44,6 +45,7 @@ class Server {
         app.use("/task", taskRoutes);
         app.use("/check-server", checkServerConnection);
         app.get("/get-artist", getArtists);
+        app.get("/get-artist/:user_name", getArtist);
         app.post("/create-artist", createArtist);
 
         app.get("/download/:folder/:filename", (req, res, next) => {

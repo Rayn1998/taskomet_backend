@@ -17,7 +17,13 @@ describe("artists controller", () => {
 
     it("getArtists: должен вернуть список артистов", async () => {
         const fakeArtists: IArtist[] = [
-            { id: 1, name: "Yuriy Bodolanov", role: 10, tgId: "bodolanov" },
+            {
+                id: 1,
+                name: "Yuriy Bodolanov",
+                role: 10,
+                user_name: "bodolanov",
+                photo_url: "photo.jpg",
+            },
         ];
         vi.spyOn(artistService, "getAll").mockResolvedValue(fakeArtists);
 
@@ -30,6 +36,7 @@ describe("artists controller", () => {
 
     it("getArtists: должен пробросить ошибку в next", async () => {
         const error = new Error("DB error");
+
         vi.spyOn(artistService, "getAll").mockRejectedValue(error);
 
         await artistController.getArtists(mockReq, mockRes, mockNext);
@@ -40,32 +47,44 @@ describe("artists controller", () => {
 
     it("createArtist: должен вернуть нового артиста", async () => {
         const mockReq = {
-            body: { name: "Yuriy Bodolanov", role: 10, tgid: "bodolanov" },
+            body: {
+                name: "Yuriy Bodolanov",
+                role: 10,
+                user_name: "bodolanov",
+                photo_url: "photo.jpg",
+            },
         } as any;
 
         const fakeArtist: IArtist = {
             id: 1,
             name: "Yuriy Bodolanov",
             role: 10,
-            tgId: "bodolanov",
+            user_name: "bodolanov",
+            photo_url: "photo.jpg",
         };
 
         vi.spyOn(artistService, "createArtist").mockResolvedValue(fakeArtist);
 
         await artistController.createArtist(mockReq, mockRes, mockNext);
 
-        expect(artistService.createArtist).toHaveBeenCalledWith(
-            "Yuriy Bodolanov",
-            10,
-            "bodolanov",
-        );
+        expect(artistService.createArtist).toHaveBeenCalledWith({
+            name: "Yuriy Bodolanov",
+            role: 10,
+            user_name: "bodolanov",
+            photo_url: "photo.jpg",
+        });
         expect(mockRes.json).toHaveBeenCalledWith(fakeArtist);
         expect(mockNext).not.toHaveBeenCalled();
     });
 
     it("createArtist: должен пробросить ошибку DB в next", async () => {
         const mockReq = {
-            body: { name: "Yuriy", role: 10, tgid: "bodolanov" },
+            body: {
+                name: "Yuriy Bodolanov",
+                role: 10,
+                user_name: "bodolanov",
+                photo_url: "photo.jpg",
+            },
         } as any;
 
         const error = new Error("DB error");
