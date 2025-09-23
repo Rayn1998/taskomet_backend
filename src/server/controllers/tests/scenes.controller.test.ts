@@ -1,14 +1,22 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import * as scenesController from "@/server/controllers/scenes.controller";
 import * as scenesService from "@/server/services/scenes.service";
+import * as fs from "fs/promises";
+
+vi.mock("fs/promises", () => {
+    return {
+        rm: vi.fn().mockResolvedValue(undefined),
+    };
+});
 
 // TYPES
 import type IScene from "@shared/types/Scene";
+import type ITaskData from "@shared/types/TaskData";
 import dataBasePool from "@/db/db";
 
 describe("scenes controller", () => {
     const mockReq = {} as any;
-    const mockRes = { json: vi.fn() } as any;
+    const mockRes = { json: vi.fn(), sendStatus: vi.fn() } as any;
     const mockNext = vi.fn();
 
     beforeEach(() => {
@@ -104,6 +112,35 @@ describe("scenes controller", () => {
         expect(mockNext).toHaveBeenCalled();
     });
 
-    it("deleteScene: должен удалить сцену - success", async () => {});
-    it("deleteScene: должен упасть, нет sceneId - error", async () => {});
+    it("deleteScene: должен удалить сцену - success", async () => {
+        const mockReq = { params: { sceneId: "1" } } as any;
+
+        vi.spyOn(dataBasePool, "query").mockImplementation(async (sql) => {
+            if (sql.startsWith("BEGIN")) return {};
+            if (sql.startsWith("SELECT id FROM")) return { rows: [{ id: 1 }] };
+            if (sql.startsWith("SELECT * FROM task_data"))
+                return { rows: [{ media: null }] } as unknown as ITaskData[];
+            if (sql.startsWith("COMMIT")) return {};
+
+            throw new Error(`Unexpected query in test: ${sql}`);
+        });
+        vi.spyOn(scenesService, "deleteScene").mockResolvedValue({} as any);
+
+        await scenesController.deleteScene(mockReq, mockRes, mockNext);
+
+        expect(scenesService.deleteScene).toHaveBeenCalledWith(1);
+        expect(mockRes.sendStatus).toHaveBeenCalledWith(204);
+        expect(mockNext).not.toHaveBeenCalled();
+    });
+    it("deleteScene: должен упасть, нет sceneId - error", async () => {
+        vi.spyOn(scenesService, "deleteScene");
+        vi.spyOn(dataBasePool, "query");
+
+        await scenesController.deleteScene(mockReq, mockRes, mockNext);
+
+        expect(dataBasePool.query).not.toHaveBeenCalled();
+        expect(scenesService.deleteScene).not.toHaveBeenCalled();
+        expect(mockRes.sendStatus).not.toHaveBeenCalled();
+        expect(mockNext).toHaveBeenCalled();
+    });
 });

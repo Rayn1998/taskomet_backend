@@ -2,7 +2,6 @@ import * as fs from "fs/promises";
 import { NextFunction, Request, Response } from "express";
 import * as scenesService from "@/server/services/scenes.service";
 import dataBasePool from "@/db/db";
-import ITask from "@shared/types/Task";
 import ITaskData from "@shared/types/TaskData";
 
 export async function getScenes(
@@ -70,13 +69,13 @@ export async function deleteScene(
     try {
         await dataBasePool.query("BEGIN");
 
-        const tasks: ITask[] = (
-            await dataBasePool.query(`SELECT * FROM tasks WHERE scene = $1;`, [
+        const tasksIds: { id: number }[] = (
+            await dataBasePool.query(`SELECT id FROM tasks WHERE scene = $1;`, [
                 sceneId,
             ])
         ).rows;
 
-        const taskIds = tasks.map((task) => task.id);
+        const taskIds = tasksIds.map((task) => task.id);
 
         const taskData: ITaskData[] = (
             await dataBasePool.query(
@@ -88,7 +87,6 @@ export async function deleteScene(
         for (const data of taskData) {
             if (data.media) await fs.rm(data.media);
         }
-
         await scenesService.deleteScene(Number(sceneId));
         await dataBasePool.query("COMMIT");
         res.sendStatus(204);
