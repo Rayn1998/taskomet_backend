@@ -72,7 +72,8 @@ class Migrate {
                 CREATE TABLE artist (
                     id SERIAL PRIMARY KEY NOT NULL,
                     name VARCHAR(50) NOT NULL,
-                    user_name VARCHAR(50) NOT NULL,
+                    user_name VARCHAR(50),
+                    tg_id INTEGER NOT NULL,
                     role INTEGER NOT NULL,
                     photo_url VARCHAR(100)
                 );

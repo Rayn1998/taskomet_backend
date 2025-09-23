@@ -26,16 +26,27 @@ class Server {
     run() {
         const app = express();
 
+        // origin: [
+        // "http://127`.0.0.1:3000",
+        // "http://localhost:3000",
+        // "http://192.168.1.130:3000",
+        // "https://018d0b525a9e.ngrok-free.app",
+        // ],
         app.use(
             cors({
                 origin: [
+                    "http://192.168.31.134:3000",
                     "http://127.0.0.1:3000",
-                    "http://localhost:3000",
-                    "https://c8dfe975c0ce.ngrok-free.app",
+                    "https://seven-doodles-tease.loca.lt",
                 ],
             }),
         );
         app.use(express.json());
+
+        // app.use((req, res, next) => {
+        //     console.log(req.method, req.url, req.headers.origin);
+        //     next();
+        // });
 
         const uploadsPath = join(process.cwd(), "uploads");
         app.use("/uploads", express.static(uploadsPath));
@@ -45,7 +56,7 @@ class Server {
         app.use("/task", taskRoutes);
         app.use("/check-server", checkServerConnection);
         app.get("/get-artist", getArtists);
-        app.get("/get-artist/:user_name", getArtist);
+        app.get("/get-artist/:tg_id", getArtist);
         app.post("/create-artist", createArtist);
 
         app.get("/download/:folder/:filename", (req, res, next) => {

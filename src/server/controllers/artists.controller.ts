@@ -21,12 +21,12 @@ export async function getArtist(
     res: Response,
     next: NextFunction,
 ) {
-    const { user_name } = req.params ?? {};
-    if (!user_name)
-        return next(new Error("No necessary data provided: user_name"));
+    const { tg_id } = req.params ?? {};
+    if (!tg_id) return next(new Error("No necessary data provided: user_name"));
 
     try {
-        const artist = await artistService.getArtist(user_name);
+        const artist = await artistService.getArtist(Number(tg_id));
+        if (artist === undefined) return res.json([]);
         res.json(artist);
     } catch (err) {
         next(err);
@@ -38,13 +38,12 @@ export async function createArtist(
     res: Response,
     next: NextFunction,
 ) {
-    const { name, user_name, role, photo_url }: Omit<IArtist, "id"> =
+    const { name, user_name, role, photo_url, tg_id }: Omit<IArtist, "id"> =
         req.body ?? {};
-    if (!(name && user_name && role && photo_url))
+
+    if (!(name && role && tg_id))
         return next(
-            new Error(
-                "Necessary data not provided: name or user_name or role or photo_url",
-            ),
+            new Error("Necessary data not provided: name or user_name or role"),
         );
 
     try {
@@ -53,6 +52,7 @@ export async function createArtist(
             user_name,
             role,
             photo_url,
+            tg_id,
         });
         res.json(newArtist);
     } catch (err) {

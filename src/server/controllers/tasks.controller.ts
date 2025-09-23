@@ -97,6 +97,7 @@ export async function updateTaskStatus(
     next: NextFunction,
 ) {
     const { taskData }: { taskData: TaskDataMin } = req.body;
+
     try {
         const update = await tasksService.updateStatus(
             taskData.task_id,
@@ -105,6 +106,7 @@ export async function updateTaskStatus(
         const updateStatusTaskData = await taskDataService.addUpdateStatus(
             taskData,
         );
+
         if (update && updateStatusTaskData) res.json(updateStatusTaskData);
     } catch (err) {
         next(err);
