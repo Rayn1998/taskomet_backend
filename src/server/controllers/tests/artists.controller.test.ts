@@ -23,6 +23,7 @@ describe("artists controller", () => {
                 role: 10,
                 user_name: "bodolanov",
                 photo_url: "photo.jpg",
+                tg_id: 1234,
             },
         ];
         vi.spyOn(artistService, "getAll").mockResolvedValue(fakeArtists);
@@ -48,6 +49,7 @@ describe("artists controller", () => {
     it("createArtist: должен вернуть нового артиста", async () => {
         const mockReq = {
             body: {
+                tg_id: 1234,
                 name: "Yuriy Bodolanov",
                 role: 10,
                 user_name: "bodolanov",
@@ -59,6 +61,7 @@ describe("artists controller", () => {
             id: 1,
             name: "Yuriy Bodolanov",
             role: 10,
+            tg_id: 1234,
             user_name: "bodolanov",
             photo_url: "photo.jpg",
         };
@@ -70,6 +73,7 @@ describe("artists controller", () => {
         expect(artistService.createArtist).toHaveBeenCalledWith({
             name: "Yuriy Bodolanov",
             role: 10,
+            tg_id: 1234,
             user_name: "bodolanov",
             photo_url: "photo.jpg",
         });
@@ -80,9 +84,9 @@ describe("artists controller", () => {
     it("createArtist: должен пробросить ошибку DB в next", async () => {
         const mockReq = {
             body: {
+                tg_id: 1234,
                 name: "Yuriy Bodolanov",
                 role: 10,
-                user_name: "bodolanov",
                 photo_url: "photo.jpg",
             },
         } as any;

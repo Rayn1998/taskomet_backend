@@ -1,3 +1,5 @@
+import "dotenv/config";
+
 // import TelegramBot from "node-telegram-bot-api";
 // import { botKey } from "@/constant";
 // import Bot from "@/bot/bot.service";
@@ -13,7 +15,7 @@ import Server from "@/server/index";
 
 // const mmproBot = new Bot(telegramBot, dataBasePool, artist);
 
-const server = new Server(dataBasePool);
+const server = new Server(dataBasePool, +process.env.SERVER_PORT!);
 
 // export { mmproBot, server };
 export { server };

@@ -43,7 +43,7 @@ export async function createArtist(
 
     if (!(name && role && tg_id))
         return next(
-            new Error("Necessary data not provided: name or user_name or role"),
+            new Error("Necessary data not provided: name or role or tg_id"),
         );
 
     try {

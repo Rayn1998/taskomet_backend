@@ -53,13 +53,15 @@ export async function getMyTasks(executorId: number): Promise<ITask[]> {
             t.project,
             t.scene,
             SUM(td.spent_hours) AS spent_hours,
+            p.name AS project_name,
             s.name AS scene_name
         FROM tasks t
         LEFT JOIN task_data td ON t.id = td.task_id
+        JOIN projects p ON t.project = p.id
         LEFT JOIN scenes s ON s.id = t.scene
         WHERE t.executor = $1
         GROUP BY 
-            t.id, t.name, t.type, t.status, t.executor, t.priority, t.description, t.project, t.scene, s.name
+            t.id, t.name, t.type, t.status, t.executor, t.priority, t.description, t.project, t.scene, p.name, s.name
         ORDER BY t.id;
         `,
             [executorId],

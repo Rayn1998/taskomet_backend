@@ -1,7 +1,8 @@
+import "dotenv/config";
 import { Pool, DatabaseError } from "pg";
 import { dbData } from "@/constant";
 
-const dataBasePool = new Pool(dbData);
+const dataBasePool = new Pool({ ...dbData, database: process.env.DB_NAME });
 
 let reconnectTimer: NodeJS.Timeout | null = null;
 

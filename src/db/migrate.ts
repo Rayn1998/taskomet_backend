@@ -1,7 +1,10 @@
+import "dotenv/config";
 import { Pool, PoolClient, DatabaseError } from "pg";
 import { rm, access } from "fs/promises";
 import { join } from "path";
 import DBconfig from "@shared/types/DBconfig";
+
+import { dbData } from "../constant";
 
 class Migrate {
     targetDB: string;
@@ -9,14 +12,9 @@ class Migrate {
     pool!: Pool;
     db!: PoolClient;
 
-    constructor(target_database: string) {
-        this.targetDB = target_database;
-        this.dataConfig = {
-            user: "postgres",
-            host: "localhost",
-            password: "postgresql",
-            port: 5432,
-        };
+    constructor(dataConfig: DBconfig) {
+        this.targetDB = dataConfig.database;
+        this.dataConfig = dataConfig;
     }
 
     async connectToDb() {
@@ -250,7 +248,7 @@ async function removeUploads() {
 }
 
 async function migration() {
-    const migrate = new Migrate("mmpro_tasks");
+    const migrate = new Migrate({ ...dbData, database: process.env.DB_NAME! });
 
     try {
         await removeUploads();

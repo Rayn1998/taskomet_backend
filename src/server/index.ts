@@ -26,27 +26,17 @@ class Server {
     run() {
         const app = express();
 
-        // origin: [
-        // "http://127`.0.0.1:3000",
-        // "http://localhost:3000",
-        // "http://192.168.1.130:3000",
-        // "https://018d0b525a9e.ngrok-free.app",
-        // ],
         app.use(
             cors({
                 origin: [
+                    "http://localhost:3000",
                     "http://192.168.31.134:3000",
                     "http://127.0.0.1:3000",
-                    "https://seven-doodles-tease.loca.lt",
+                    "https://heavy-news-mate.loca.lt",
                 ],
             }),
         );
         app.use(express.json());
-
-        // app.use((req, res, next) => {
-        //     console.log(req.method, req.url, req.headers.origin);
-        //     next();
-        // });
 
         const uploadsPath = join(process.cwd(), "uploads");
         app.use("/uploads", express.static(uploadsPath));
