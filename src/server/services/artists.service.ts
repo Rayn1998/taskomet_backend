@@ -2,13 +2,16 @@ import dataBasePool from "@/db/db";
 import IArtist from "@shared/types/Artist";
 
 export async function getAll(): Promise<IArtist[]> {
-    return (await dataBasePool.query(`SELECT * FROM artist`)).rows;
+    return (await dataBasePool.query(`SELECT * FROM artist ORDER BY name;`))
+        .rows;
 }
 
-export async function getArtist(tg_id: number): Promise<IArtist | undefined> {
+export async function getArtist(
+    user_name: string,
+): Promise<IArtist | undefined> {
     return (
-        await dataBasePool.query("SELECT * FROM artist WHERE tg_id = $1;", [
-            tg_id,
+        await dataBasePool.query("SELECT * FROM artist WHERE user_name = $1;", [
+            user_name,
         ])
     ).rows[0];
 }
@@ -26,6 +29,41 @@ export async function createArtist(
             RETURNING *;
         `,
             [name, user_name, role, photo_url, tg_id],
+        )
+    ).rows[0];
+}
+
+export async function updateArtistRole(
+    artistId: number,
+    role: number,
+): Promise<IArtist> {
+    return (
+        await dataBasePool.query(
+            `
+            UPDATE artist
+            SET role = $1
+            WHERE id = $2
+            RETURNING *;
+        `,
+            [role, artistId],
+        )
+    ).rows[0];
+}
+
+export async function updateArtistAfterRegister(
+    props: Omit<IArtist, "id" | "role" | "name">,
+): Promise<IArtist> {
+    const { photo_url, tg_id, user_name } = props;
+
+    return (
+        await dataBasePool.query(
+            `
+                UPDATE artist
+                SET photo_url = $1, tg_id = $2
+                WHERE user_name = $3
+                RETURNING *;
+            `,
+            [photo_url, tg_id, user_name],
         )
     ).rows[0];
 }

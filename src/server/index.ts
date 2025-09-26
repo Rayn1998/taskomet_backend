@@ -10,6 +10,8 @@ import {
     getArtists,
     getArtist,
     createArtist,
+    updateArtistRole,
+    updateArtistAfterRegister,
 } from "@/server/controllers/artists.controller";
 import { getMyTasks } from "@/server/controllers/tasks.controller";
 import { checkServerConnection } from "@/server/controllers/check-server.controller";
@@ -45,9 +47,13 @@ class Server {
         app.use("/my-tasks/:executorId", getMyTasks);
         app.use("/task", taskRoutes);
         app.use("/check-server", checkServerConnection);
+
+        // artist
         app.get("/get-artist", getArtists);
-        app.get("/get-artist/:tg_id", getArtist);
+        app.get("/get-artist/:user_name", getArtist);
         app.post("/create-artist", createArtist);
+        app.patch("/artist-role", updateArtistRole);
+        app.patch("/update-new-artist", updateArtistAfterRegister);
 
         app.get("/download/:folder/:filename", (req, res, next) => {
             const { folder, filename } = req.params;

@@ -70,8 +70,8 @@ class Migrate {
                 CREATE TABLE artist (
                     id SERIAL PRIMARY KEY NOT NULL,
                     name VARCHAR(50) NOT NULL,
-                    user_name VARCHAR(50),
-                    tg_id INTEGER NOT NULL,
+                    user_name VARCHAR(50) NOT NULL UNIQUE,
+                    tg_id INTEGER,
                     role INTEGER NOT NULL,
                     photo_url VARCHAR(100)
                 );
@@ -126,7 +126,7 @@ class Migrate {
                     name VARCHAR(50) NOT NULL,
                     type INTEGER NOT NULL,
                     status INTEGER NOT NULL,
-                    executor INTEGER REFERENCES artist(id),
+                    executor INTEGER REFERENCES artist(id) ON DELETE SET NULL,
                     priority INTEGER NOT NULL,
                     description VARCHAR(500) NOT NULL,
                     project INTEGER REFERENCES projects(id) ON DELETE CASCADE,
@@ -142,7 +142,7 @@ class Migrate {
                     text VARCHAR(500),
                     media VARCHAR(100),
                     created_at TIMESTAMP NOT NULL,
-                    created_by INTEGER REFERENCES artist(id) NOT NULL,
+                    created_by INTEGER REFERENCES artist(id) ON DELETE SET NULL,
                     status INTEGER,
                     spent_hours NUMERIC(4, 1)
                 );
