@@ -1,9 +1,27 @@
 import dataBasePool from "@/db/db";
 
 import IProject from "@shared/types/Project";
+import IProjectProgress from "@shared/types/ProjectProgress";
 
 export async function getAll(): Promise<IProject[]> {
     return (await dataBasePool.query("SELECT * FROM projects")).rows;
+}
+
+export async function getProjectsProgress(
+    projectId: number,
+): Promise<IProjectProgress[]> {
+    return (
+        await dataBasePool.query(
+            `
+        SELECT status, COUNT(*) as amount
+        FROM tasks
+        WHERE project = $1
+        GROUP BY status
+        ORDER BY status; 
+    `,
+            [projectId],
+        )
+    ).rows;
 }
 
 export async function createProject(

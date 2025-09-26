@@ -87,6 +87,7 @@ describe("artists controller", () => {
                 tg_id: 1234,
                 name: "Yuriy Bodolanov",
                 role: 10,
+                user_name: "bodolanov",
                 photo_url: "photo.jpg",
             },
         } as any;

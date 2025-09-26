@@ -11,9 +11,23 @@ export async function getProjects(
     next: NextFunction,
 ) {
     try {
+        await dataBasePool.query("BEGIN");
         const projects = await projectService.getAll();
-        res.json(projects);
+        const progressArr = [];
+        for (const project of projects) {
+            const progress = await projectService.getProjectsProgress(
+                project.id,
+            );
+            const resData = {
+                projectId: project.id,
+                progress: progress,
+            };
+            progressArr.push(resData);
+        }
+        await dataBasePool.query("COMMIT");
+        res.json([projects, progressArr]);
     } catch (err) {
+        await dataBasePool.query("ROLLBACK");
         next(err);
     }
 }
