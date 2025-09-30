@@ -12,18 +12,52 @@ export async function getProjects(
 ) {
     try {
         await dataBasePool.query("BEGIN");
+
         const projects = await projectService.getAll();
         const progressArr = [];
         for (const project of projects) {
             const progress = await projectService.getProjectsProgress(
                 project.id,
             );
+
+            const idsOfTasks = (
+                await dataBasePool.query(
+                    "SELECT array_agg(id) FROM tasks WHERE project = $1;",
+                    [project.id],
+                )
+            ).rows[0].array_agg;
+
+            const spentHours = (
+                await dataBasePool.query(
+                    `
+                    SELECT SUM(spent_hours) AS hours
+                    FROM task_data 
+                    WHERE task_id = ANY($1);
+                    `,
+                    [idsOfTasks],
+                )
+            ).rows[0].hours;
+
+            const executorsCount = (
+                await dataBasePool.query(
+                    `
+                SELECT COUNT(DISTINCT executor) 
+                FROM tasks
+                WHERE project = $1;
+            `,
+                    [project.id],
+                )
+            ).rows[0].count;
+
             const resData = {
-                projectId: project.id,
+                entityId: project.id,
                 progress: progress,
+                spentHours: Number(spentHours),
+                executorsCount: Number(executorsCount),
             };
             progressArr.push(resData);
         }
+
         await dataBasePool.query("COMMIT");
         res.json([projects, progressArr]);
     } catch (err) {

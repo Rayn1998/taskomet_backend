@@ -34,7 +34,7 @@ class Server {
                     "http://localhost:3000",
                     "http://192.168.31.134:3000",
                     "http://127.0.0.1:3000",
-                    "https://heavy-news-mate.loca.lt",
+                    "https://strong-mammals-dress.loca.lt",
                 ],
             }),
         );

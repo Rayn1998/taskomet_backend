@@ -38,6 +38,33 @@ export async function getTasks(
     ).rows;
 }
 
+export async function getAllTasks(projectId: number): Promise<ITask[]> {
+    return (
+        await dataBasePool.query(
+            `
+        SELECT 
+            t.id,
+            t.name,
+            t.type,
+            t.status,
+            t.executor,
+            t.priority,
+            t.description,
+            t.project,
+            t.scene,
+            SUM(td.spent_hours) AS spent_hours
+        FROM tasks t
+        LEFT JOIN task_data td ON t.id = td.task_id
+        WHERE project = $1
+        GROUP BY 
+            t.id, t.name, t.type, t.status, t.executor, t.priority, t.description, t.project, t.scene
+        ORDER BY t.id;
+        `,
+            [projectId],
+        )
+    ).rows;
+}
+
 export async function getMyTasks(executorId: number): Promise<ITask[]> {
     return (
         await dataBasePool.query(

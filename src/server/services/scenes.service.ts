@@ -1,6 +1,9 @@
 import dataBasePool from "@/db/db";
 
-export async function getAll(projectId: string) {
+import type IScene from "@shared/types/Scene";
+import type IEntityProgress from "@shared/types/EntityProgress";
+
+export async function getAll(projectId: string): Promise<IScene[]> {
     const result = await dataBasePool.query(
         `
         SELECT scenes.*
@@ -11,6 +14,23 @@ export async function getAll(projectId: string) {
         [projectId],
     );
     return result.rows;
+}
+
+export async function getScenesProgress(
+    sceneId: number,
+): Promise<IEntityProgress[]> {
+    return (
+        await dataBasePool.query(
+            `
+        SELECT status, COUNT(*) as amount
+        FROM tasks
+        WHERE scene = $1
+        GROUP BY status
+        ORDER BY status; 
+    `,
+            [sceneId],
+        )
+    ).rows;
 }
 
 export async function createScene(

@@ -1,7 +1,7 @@
 import dataBasePool from "@/db/db";
 
-import IProject from "@shared/types/Project";
-import IProjectProgress from "@shared/types/ProjectProgress";
+import type IProject from "@shared/types/Project";
+import type IEntityProgress from "@shared/types/EntityProgress";
 
 export async function getAll(): Promise<IProject[]> {
     return (await dataBasePool.query("SELECT * FROM projects")).rows;
@@ -9,7 +9,7 @@ export async function getAll(): Promise<IProject[]> {
 
 export async function getProjectsProgress(
     projectId: number,
-): Promise<IProjectProgress[]> {
+): Promise<IEntityProgress[]> {
     return (
         await dataBasePool.query(
             `

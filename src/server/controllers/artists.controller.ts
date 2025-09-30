@@ -42,8 +42,6 @@ export async function createArtist(
     const { name, user_name, role, photo_url, tg_id }: Omit<IArtist, "id"> =
         req.body ?? {};
 
-    console.log(name, user_name, role);
-
     if (!(name && Number.isInteger(role) && user_name))
         return next(
             new Error("Necessary data not provided: name or role or user_name"),

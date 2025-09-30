@@ -14,9 +14,54 @@ export async function getScenes(
         return next(new Error("No necessary data provided: projectId"));
 
     try {
+        await dataBasePool.query("BEGIN");
         const scenes = await scenesService.getAll(projectId);
-        res.json(scenes);
+        const progressArr = [];
+        for (const scene of scenes) {
+            const progress = await scenesService.getScenesProgress(scene.id);
+
+            const idsOfTasks = (
+                await dataBasePool.query(
+                    "SELECT array_agg(id) FROM tasks WHERE scene = $1;",
+                    [scene.id],
+                )
+            ).rows[0].array_agg;
+
+            const spentHours = (
+                await dataBasePool.query(
+                    `
+                    SELECT SUM(spent_hours) AS hours
+                    FROM task_data 
+                    WHERE task_id = ANY($1);
+                    `,
+                    [idsOfTasks],
+                )
+            ).rows[0].hours;
+
+            const executorsCount = (
+                await dataBasePool.query(
+                    `
+                SELECT COUNT(DISTINCT executor) 
+                FROM tasks
+                WHERE scene = $1;
+            `,
+                    [scene.id],
+                )
+            ).rows[0].count;
+
+            const resData = {
+                entityId: scene.id,
+                progress: progress,
+                spentHours: Number(spentHours),
+                executorsCount: Number(executorsCount),
+            };
+            progressArr.push(resData);
+        }
+
+        await dataBasePool.query("COMMIT");
+        res.json([scenes, progressArr]);
     } catch (err) {
+        await dataBasePool.query("ROLLBACK");
         next(err);
     }
 }

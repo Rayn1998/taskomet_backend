@@ -22,6 +22,24 @@ export async function getTasks(
     }
 }
 
+export async function getAllTasks(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) {
+    const { projectId } = req.params;
+
+    if (!projectId)
+        return next(new Error("No necessary data provided: projectId"));
+
+    try {
+        const tasks = await tasksService.getAllTasks(Number(projectId));
+        res.json(tasks);
+    } catch (err) {
+        next(err);
+    }
+}
+
 export async function createTask(
     req: Request,
     res: Response,
