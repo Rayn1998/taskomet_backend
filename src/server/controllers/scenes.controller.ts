@@ -19,6 +19,7 @@ export async function getScenes(
         const progressArr = [];
         for (const scene of scenes) {
             const progress = await scenesService.getScenesProgress(scene.id);
+            const priority = await scenesService.getScenesPriority(scene.id);
 
             const idsOfTasks = (
                 await dataBasePool.query(
@@ -51,7 +52,8 @@ export async function getScenes(
 
             const resData = {
                 entityId: scene.id,
-                progress: progress,
+                progress,
+                priority,
                 spentHours: Number(spentHours),
                 executorsCount: Number(executorsCount),
             };

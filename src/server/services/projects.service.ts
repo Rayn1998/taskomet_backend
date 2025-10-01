@@ -9,7 +9,7 @@ export async function getAll(): Promise<IProject[]> {
 
 export async function getProjectsProgress(
     projectId: number,
-): Promise<IEntityProgress[]> {
+): Promise<{ status: number; amount: number }[]> {
     return (
         await dataBasePool.query(
             `
@@ -18,6 +18,23 @@ export async function getProjectsProgress(
         WHERE project = $1
         GROUP BY status
         ORDER BY status; 
+    `,
+            [projectId],
+        )
+    ).rows;
+}
+
+export async function getProjectsPriority(
+    projectId: number,
+): Promise<{ priority: number; amount: number }[]> {
+    return (
+        await dataBasePool.query(
+            `
+        SELECT priority, COUNT(*) as amount
+        FROM tasks
+        WHERE project = $1
+        GROUP BY priority
+        ORDER BY priority; 
     `,
             [projectId],
         )

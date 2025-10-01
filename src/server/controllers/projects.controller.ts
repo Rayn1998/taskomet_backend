@@ -19,6 +19,9 @@ export async function getProjects(
             const progress = await projectService.getProjectsProgress(
                 project.id,
             );
+            const priority = await projectService.getProjectsPriority(
+                project.id,
+            );
 
             const idsOfTasks = (
                 await dataBasePool.query(
@@ -51,7 +54,8 @@ export async function getProjects(
 
             const resData = {
                 entityId: project.id,
-                progress: progress,
+                progress,
+                priority,
                 spentHours: Number(spentHours),
                 executorsCount: Number(executorsCount),
             };
