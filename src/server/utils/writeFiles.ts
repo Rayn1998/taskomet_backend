@@ -1,13 +1,13 @@
 import { join } from "path";
 import { mkdir, access } from "fs/promises";
-import { PathLike } from "fs";
+import type { PathLike } from "fs";
 
 const now = new Date();
 const CURRENT_DATE = `${now.getDate()}_${
     now.getMonth() + 1
 }_${now.getFullYear()}`;
 
-const UPLOADS_FOLDER_PATH = join(__dirname, "../../../uploads");
+const UPLOADS_FOLDER_PATH = join(process.cwd(), "uploads");
 const CURRENT_DATE_PATH = join(UPLOADS_FOLDER_PATH, CURRENT_DATE);
 
 export async function checkFolders(): Promise<string> {

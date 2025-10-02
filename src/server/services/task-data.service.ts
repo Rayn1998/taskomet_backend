@@ -1,6 +1,7 @@
 import dataBasePool from "@/db/db";
-import ITaskData, { TaskDataMin } from "@shared/types/TaskData";
 import { updateStatus } from "./tasks.service";
+
+import type { ITaskData, TaskDataMin } from "@shared/types/EntityData";
 
 export async function getTaskData(taskId: number): Promise<ITaskData[]> {
     return (

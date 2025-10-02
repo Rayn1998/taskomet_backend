@@ -1,9 +1,12 @@
 import * as fs from "fs/promises";
 import { NextFunction, Request, Response } from "express";
+
 import * as projectService from "@/server/services/projects.service";
 import dataBasePool from "@/db/db";
 
-import ITaskData from "@shared/types/TaskData";
+import { saveMedia } from "@/server/utils/saveMedia";
+
+import type { IProjectData, ITaskData } from "@shared/types/EntityData";
 
 export async function getProjects(
     req: Request,
@@ -70,6 +73,22 @@ export async function getProjects(
     }
 }
 
+export async function getProjectData(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) {
+    const { id } = req.query ?? {};
+    if (!id) return next(new Error("No necessary data provided: id"));
+
+    try {
+        const projectData = await projectService.getProjectData(Number(id));
+        res.json(projectData);
+    } catch (err) {
+        next(err);
+    }
+}
+
 export async function createProject(
     req: Request,
     res: Response,
@@ -131,6 +150,46 @@ export async function deleteProject(
         res.sendStatus(204);
     } catch (err) {
         await dataBasePool.query("ROLLBACK");
+        next(err);
+    }
+}
+
+export async function addProjectMedia(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) {
+    const data = JSON.parse(req.body.data);
+    if (!data) return next(new Error("No necessary data provided"));
+
+    await saveMedia(
+        data,
+        req.file,
+        async () => {
+            const newData = await projectService.addMedia(data as IProjectData);
+            if (newData) res.json(newData);
+        },
+        () => {
+            next(new Error("Ошибка добавления комментария"));
+        },
+    );
+}
+
+export async function deleteProjectMedia(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) {
+    const { mediaId } = req.params ?? {};
+    if (!mediaId) return next(new Error("No necessary data provided: mediaId"));
+
+    try {
+        const deleted = await projectService.deleteProjectMedia(+mediaId);
+        if (deleted.media && deleted.media !== null) {
+            fs.rm(deleted.media);
+        }
+        if (deleted) res.sendStatus(200);
+    } catch (err) {
         next(err);
     }
 }

@@ -1,12 +1,11 @@
-import { randomBytes } from "crypto";
-import { join } from "path";
 import * as fs from "fs/promises";
-
 import { NextFunction, Request, Response } from "express";
-import ffmpeg from "fluent-ffmpeg";
-import * as taskDataService from "@/server/services/task-data.service";
 
-import ITaskData from "@shared/types/TaskData";
+import * as taskDataService from "@/server/services/task-data.service";
+import { saveMedia } from "@/server/utils/saveMedia";
+
+// TYPES
+import type { ITaskData } from "@shared/types/EntityData";
 
 export async function getTaskData(
     req: Request,
@@ -32,61 +31,17 @@ export async function addComment(
     const data = JSON.parse(req.body.data);
     if (!data) return next(new Error("No necessary data provided"));
 
-    try {
-        if (req.file) {
-            const newName = randomBytes(4).toString("hex");
-            const ext = req.file.originalname
-                .split(".")
-                .slice(-1)[0]
-                .toLowerCase();
-
-            if (ext === "mp4" || ext === "mov") {
-                const fullPath = join(req.file.destination, newName + ".mp4");
-                const relativePath = fullPath.split("/").slice(-3).join("/");
-
-                ffmpeg(req.file.path)
-                    .outputOptions([
-                        "-c:v libx264",
-                        "-c:a aac",
-                        "-movflags +faststart",
-                    ])
-                    .save(fullPath)
-                    .on("end", async () => {
-                        await fs.rm(req.file!.path);
-                        data.media = relativePath;
-                        const newData = await taskDataService.addComment(
-                            data as ITaskData,
-                        );
-                        if (newData) res.json(newData);
-                    })
-                    .on("error", (err) => {
-                        err.message = "Ошибка при конвертации";
-                        next(err);
-                    });
-            } else {
-                const fullPath = join(
-                    req.file.destination,
-                    newName + "." + ext,
-                );
-                const relativePath = fullPath.split("/").slice(-3).join("/");
-                await fs.rename(req.file.path, fullPath);
-                data.media = relativePath;
-                const newData = await taskDataService.addComment(
-                    data as ITaskData,
-                );
-                if (newData) res.json(newData);
-            }
-        } else {
+    await saveMedia(
+        data,
+        req.file,
+        async () => {
             const newData = await taskDataService.addComment(data as ITaskData);
-            if (newData) {
-                res.json(newData);
-            } else {
-                next(new Error("Ошибка добавления комментария"));
-            }
-        }
-    } catch (err) {
-        next(err);
-    }
+            if (newData) res.json(newData);
+        },
+        () => {
+            next(new Error("Ошибка добавления комментария"));
+        },
+    );
 }
 
 export async function deleteComment(

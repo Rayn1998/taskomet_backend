@@ -91,7 +91,7 @@ class Migrate {
                 CREATE TABLE project_data(
                     id SERIAL PRIMARY KEY,
                     project_id INTEGER REFERENCES projects(id) ON DELETE CASCADE,
-                    text VARCHAR(500),
+                    text VARCHAR(1000),
                     media VARCHAR(100),
                     created_at TIMESTAMP NOT NULL,
                     created_by INTEGER REFERENCES artist(id) NOT NULL
@@ -113,7 +113,7 @@ class Migrate {
                 CREATE TABLE scene_data(
                     id SERIAL PRIMARY KEY,
                     scene_id INTEGER REFERENCES scenes(id) ON DELETE CASCADE,
-                    text VARCHAR(500),
+                    text VARCHAR(1000),
                     media VARCHAR(100),
                     created_at TIMESTAMP NOT NULL,
                     created_by INTEGER REFERENCES artist(id) NOT NULL
