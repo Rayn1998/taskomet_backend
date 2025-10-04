@@ -13,7 +13,7 @@ import Server from "@/server/index";
 // const google = new Google();
 // const artist = new Artist();
 
-// const mmproBot = new Bot(telegramBot, dataBasePool, artist);
+// const mmproBot = new Bot(telegramBot, dataBasePool);
 
 const server = new Server(dataBasePool, +process.env.SERVER_PORT!);
 

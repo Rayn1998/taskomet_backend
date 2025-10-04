@@ -5,7 +5,7 @@ import * as taskDataService from "@/server/services/task-data.service";
 import dataBasePool from "@/db/db";
 
 // TYPES
-import { TaskDataMin } from "@shared/types/TaskData";
+import { TaskDataMin } from "@shared/types/EntityData";
 
 export async function getTasks(
     req: Request,
@@ -152,7 +152,13 @@ export async function getMyTasks(
 ) {
     const { executorId } = req.params;
     try {
-        const tasks = await tasksService.getMyTasks(Number(executorId));
+        const artist = (
+            await dataBasePool.query("SELECT * FROM artist WHERE id = $1;", [
+                executorId,
+            ])
+        ).rows[0];
+        const tasks = await tasksService.getMyTasks(Number(artist.id));
+
         res.json(tasks);
     } catch (err) {
         next(err);

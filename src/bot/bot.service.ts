@@ -14,7 +14,7 @@ import { botAddCommands, botCommands } from "@/bot/bot.commands";
 export default class Bot {
     bot: TelegramBot;
     db: Pool;
-    artist: Artist;
+    // artist: Artist;
     // google: Google;
     process: boolean;
 
@@ -22,11 +22,11 @@ export default class Bot {
         botInstance: TelegramBot,
         dbInstance: Pool,
         // googleInstance: Google,
-        artistInstance: Artist,
+        // artistInstance: Artist,
     ) {
         this.bot = botInstance;
         this.db = dbInstance;
-        this.artist = artistInstance;
+        // this.artist = artistInstance;
         // this.google = googleInstance;
         this.process = false;
     }
@@ -34,11 +34,11 @@ export default class Bot {
     public async init() {
         try {
             const dbConnection = await this._connectToDb();
-            const commandsStatus = await this._setCommands();
+            // const commandsStatus = await this._setCommands();
             // const googleConnection = await this.google.init();
 
-            if (!dbConnection || !commandsStatus) {
-                throw new Error("Something doesn't work, check");
+            if (!dbConnection) {
+                throw new Error("Something doesn't work with bot, check");
             }
 
             console.log("Bot started to work");
@@ -56,11 +56,11 @@ export default class Bot {
         try {
             const connection = await this.db.connect();
             if (connection) {
-                console.log("DataBase connection established");
+                console.log("Bot DataBase connection established");
             }
             return true;
         } catch (err) {
-            console.log("Can't connect to db");
+            console.log("Bot can't connect to db");
             return false;
         }
     }
@@ -147,11 +147,11 @@ export default class Bot {
         return false;
     }
 
-    private async _cancelAllStarted(chatId: number) {
-        this.artist.deleteStates(this, chatId);
+    // private async _cancelAllStarted(chatId: number) {
+    //     this.artist.deleteStates(this, chatId);
 
-        await this.sendMessage(chatId, "Отмена");
-    }
+    //     await this.sendMessage(chatId, "Отмена");
+    // }
 
     public async listen() {
         this.bot.onText(/.*/, async (msg) => {
@@ -173,10 +173,10 @@ export default class Bot {
             }
 
             if (this.process) {
-                if (this.artist.newArtistProcess) {
-                    await this.artist.addNewArtist(this, msg);
-                    return;
-                }
+                // if (this.artist.newArtistProcess) {
+                // await this.artist.addNewArtist(this, msg);
+                // return;
+                // }
             }
         });
 
@@ -186,14 +186,14 @@ export default class Bot {
             if (!chatId || !inputData) return;
 
             if (inputData === "cancel") {
-                await this._cancelAllStarted(chatId);
+                // await this._cancelAllStarted(chatId);
                 return;
             }
 
             if (this.process) {
-                if (this.artist.newArtistProcess) {
-                    await this.artist.addNewArtist(this, query);
-                }
+                // if (this.artist.newArtistProcess) {
+                // await this.artist.addNewArtist(this, query);
+                // }
             }
         });
     }
