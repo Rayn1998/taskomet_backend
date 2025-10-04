@@ -11,6 +11,7 @@ import {
     getArtists,
     getArtist,
     createArtist,
+    deleteArtist,
     updateArtistRole,
     updateArtistAfterRegister,
 } from "@/server/controllers/artists.controller";
@@ -37,7 +38,7 @@ class Server {
                     "http://localhost:3000",
                     "http://192.168.31.134:3000",
                     "http://127.0.0.1:3000",
-                    "https://fifty-houses-teach.loca.lt",
+                    "https://red-pigs-send.loca.lt",
                 ],
             }),
         );
@@ -59,6 +60,7 @@ class Server {
         app.post("/create-artist", createArtist);
         app.patch("/artist-role", updateArtistRole);
         app.patch("/update-new-artist", updateArtistAfterRegister);
+        app.delete("/delete-artist", deleteArtist);
 
         app.get("/download/:folder/:filename", (req, res, next) => {
             const { folder, filename } = req.params;

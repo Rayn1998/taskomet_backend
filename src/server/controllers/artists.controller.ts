@@ -105,3 +105,21 @@ export async function updateArtistAfterRegister(
         next(err);
     }
 }
+
+export async function deleteArtist(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) {
+    const { artistId } = req.query ?? null;
+
+    if (!artistId)
+        return next(new Error("Necessary data not provided: artist Id"));
+
+    try {
+        const deletedArtist = await artistService.deleteArtist(+artistId);
+        res.json(deletedArtist);
+    } catch (err) {
+        next(err);
+    }
+}

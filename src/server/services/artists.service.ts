@@ -67,3 +67,12 @@ export async function updateArtistAfterRegister(
         )
     ).rows[0];
 }
+
+export async function deleteArtist(artistId: number): Promise<IArtist> {
+    return (
+        await dataBasePool.query(
+            "DELETE FROM artist WHERE id = $1 RETURNING *;",
+            [artistId],
+        )
+    ).rows[0];
+}
