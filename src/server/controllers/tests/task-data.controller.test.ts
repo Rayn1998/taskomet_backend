@@ -1,7 +1,7 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import * as taskDataService from "@/server/services/task-data.service";
 import * as taskDataController from "@/server/controllers/task-data.controller";
-import type ITaskData from "@shared/types/TaskData";
+import type { ITaskData } from "@shared/types/EntityData";
 import ffmpeg from "fluent-ffmpeg";
 
 vi.mock("fs/promises", () => ({

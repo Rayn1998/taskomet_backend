@@ -9,7 +9,7 @@ vi.mock("fs/promises", () => {
 
 // TYPES
 import type IScene from "@shared/types/Scene";
-import type ITaskData from "@shared/types/TaskData";
+import type { ITaskData } from "@shared/types/EntityData";
 import dataBasePool from "@/db/db";
 
 describe("scenes controller", () => {

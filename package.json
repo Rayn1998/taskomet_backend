@@ -1,14 +1,14 @@
 {
-    "name": "task_manager",
+    "name": "taskomet_backend",
     "version": "1.0.0",
-    "description": "",
+    "description": "task manager specialized for advertisement VFX post-production needs",
     "license": "ISC",
-    "author": "",
+    "author": "Yuriy Bodolanov",
     "main": "index.js",
     "scripts": {
-        "start": "node dist/index.js",
-        "build": "tsc",
-        "buildAndStart": "tsc && node dist/index.js",
+        "start": "node dist/backend/src/index.js",
+        "build": "tsc && tsc-alias",
+        "build_and_start": "tsc && node dist/index.js",
         "dev": "tsnd --respawn -T -r tsconfig-paths/register src/index.ts",
         "migratedb": "tsnd -T src/db/migrate.ts",
         "test": "vitest run"
@@ -23,6 +23,7 @@
         "@types/pg": "^8.15.4",
         "ts-node": "^10.9.2",
         "ts-node-dev": "^2.0.0",
+        "tsc-alias": "^1.8.16",
         "tsconfig-paths": "^4.2.0",
         "typescript": "^5.8.3",
         "vitest": "^3.2.4"
