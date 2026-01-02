@@ -1,4 +1,6 @@
 import { Request, Response, NextFunction } from "express";
+import { hashPassword } from "@/server/utils/passwordHash";
+import * as sessionController from "@/server/controllers/session.controller";
 import * as artistService from "@/server/services/artists.service";
 
 import IArtist from "@shared/types/Artist";
@@ -39,23 +41,26 @@ export async function createArtist(
     res: Response,
     next: NextFunction,
 ) {
-    const { name, user_name, role, photo_url, tg_id }: Omit<IArtist, "id"> =
+    const { name, user_name, email, password }: Omit<IArtist, "id"> =
         req.body ?? {};
 
-    if (!(name && Number.isInteger(role) && user_name))
+    if (!(name && user_name && email && password))
         return next(
-            new Error("Necessary data not provided: name or role or user_name"),
+            new Error(
+                "Necessary data not provided: name, user_name, email, password",
+            ),
         );
 
     try {
-        const newArtist: IArtist = await artistService.createArtist({
+        const passwordHash = await hashPassword(password);
+        const newArtist = await artistService.createArtist({
             name,
             user_name,
-            role,
-            photo_url,
-            tg_id,
+            email,
+            password: passwordHash,
         });
-        res.json(newArtist);
+        const session = await sessionController.createSession(newArtist.id);
+        res.cookie("session", session).sendStatus(200);
     } catch (err) {
         next(err);
     }
@@ -95,12 +100,12 @@ export async function updateArtistAfterRegister(
             ),
         );
     try {
-        const updatedArtist = await artistService.updateArtistAfterRegister({
-            photo_url,
-            tg_id,
-            user_name,
-        });
-        res.json(updatedArtist);
+        // const updatedArtist = await artistService.updateArtistAfterRegister({
+        //     photo_url,
+        //     tg_id,
+        //     user_name,
+        // });
+        // res.json(updatedArtist);
     } catch (err) {
         next(err);
     }

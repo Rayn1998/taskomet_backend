@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { multerInstance } from "@/server/utils/multer";
+import { multerInstance } from "@/server/utils/multerUtil";
 import {
     getProjects,
     getProjectData,

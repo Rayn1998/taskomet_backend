@@ -7,7 +7,7 @@ import "dotenv/config";
 // import Artist from "@/artist/artist.service";
 import dataBasePool from "@/db/db";
 
-import Server from "@/server/index";
+import Server from "@/server/server";
 
 // const telegramBot = new TelegramBot(botKey, { polling: true });
 // const google = new Google();

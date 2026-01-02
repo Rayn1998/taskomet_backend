@@ -2,10 +2,7 @@ node_modules
 dist
 test.js
 TODO.md
-table.sql
 *constant*
-*credentials*
 *DS_Store*
-artist_*.json
 uploads
 .VSCodeCounter

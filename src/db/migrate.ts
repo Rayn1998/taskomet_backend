@@ -6,6 +6,8 @@ import DBconfig from "@shared/types/DBconfig";
 
 import { dbData } from "../constant";
 
+import { isDatabaseError } from "../typeguards/typeguards";
+
 class Migrate {
     targetDB: string;
     dataConfig: DBconfig;
@@ -26,7 +28,7 @@ class Migrate {
             this.pool = pool;
             this.db = await this.pool.connect();
         } catch (err) {
-            if (err instanceof DatabaseError) {
+            if (isDatabaseError(err)) {
                 if (err.code === "28P01") {
                     console.log("Incorrect password to db");
                 }
@@ -71,7 +73,9 @@ class Migrate {
                     id SERIAL PRIMARY KEY NOT NULL,
                     name VARCHAR(50) NOT NULL,
                     user_name VARCHAR(50) NOT NULL UNIQUE,
-                    tg_id INTEGER,
+                    email VARCHAR(50) NOT NULL UNIQUE,
+                    password VARCHAR(200) NOT NULL UNIQUE,
+                    tg_id BIGINT,
                     role INTEGER NOT NULL,
                     photo_url VARCHAR(100)
                 );
@@ -94,7 +98,7 @@ class Migrate {
                     text VARCHAR(1000),
                     media VARCHAR(100),
                     created_at TIMESTAMP NOT NULL,
-                    created_by INTEGER REFERENCES artist(id) NOT NULL
+                    created_by INTEGER REFERENCES artist(id) ON DELETE SET NULL
                 );
             `);
 
@@ -116,7 +120,7 @@ class Migrate {
                     text VARCHAR(1000),
                     media VARCHAR(100),
                     created_at TIMESTAMP NOT NULL,
-                    created_by INTEGER REFERENCES artist(id) NOT NULL
+                    created_by INTEGER REFERENCES artist(id) ON DELETE SET NULL
                 );
             `);
 
@@ -146,6 +150,14 @@ class Migrate {
                     status INTEGER,
                     spent_hours NUMERIC(4, 1)
                 );
+            `);
+
+            await this.db.query(`
+                CREATE TABLE sessions(
+                    id TEXT PRIMARY KEY,
+                    user_id INTEGER REFERENCES artist(id),
+                    expires_at TIMESTAMP NOT NULL
+                );    
             `);
 
             console.log("Tables succsessfully created");
@@ -225,11 +237,6 @@ class Migrate {
             VALUES 
                 ('Yuriy Bodolanov', 'bodolanov', 10, 'blob:https://web.telegram.org/976fe224-43df-4c79-bb6e-1ea02f1b4737');
             `);
-            /*
-                ('Vladimir Korneytsev', 2, 'vvmpro'),
-                ('Tim Popov', 0, 'timpopov'),
-                ('Anna', 1, 'anna');
-            */
         } catch (err) {
             console.error(err);
         }

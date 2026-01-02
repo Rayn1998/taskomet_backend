@@ -11,7 +11,7 @@ import {
     updateTaskPriority,
     deleteTask,
 } from "@/server/controllers/tasks.controller";
-import { multerInstance } from "@/server/utils/multer";
+import { multerInstance } from "@/server/utils/multerUtil";
 
 const router = Router();
 

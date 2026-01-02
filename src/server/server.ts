@@ -3,7 +3,6 @@ import { join } from "path";
 
 import cors from "cors";
 import { Pool } from "pg";
-// import Bot from "@/bot/bot.service";
 import projectRoutes from "@/server/routes/projects.routes";
 import taskRoutes from "@/server/routes/task.routes";
 import { errorHandler } from "@/server/error/errorHandler";
@@ -20,12 +19,10 @@ import { checkServerConnection } from "@/server/controllers/check-server.control
 
 class Server {
     db: Pool;
-    // botInstance: Bot;
     port: number;
 
     constructor(dbInstance: Pool, port = 3001) {
         this.db = dbInstance;
-        // this.botInstance = botInstance;
         this.port = port;
     }
 
@@ -50,8 +47,6 @@ class Server {
         app.use("/my-tasks/:executorId", getMyTasks);
         app.use("/task", taskRoutes);
         app.use("/check-server", checkServerConnection);
-
-        // this.botInstance.sendMessage()
 
         // artist
         app.get("/get-artist", getArtists);

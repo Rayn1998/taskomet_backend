@@ -17,18 +17,26 @@ export async function getArtist(
 }
 
 export async function createArtist(
-    props: Omit<IArtist, "id">,
+    props: Omit<IArtist, "id" | "role" | "photo_url">,
 ): Promise<IArtist> {
-    const { name, user_name, role, photo_url, tg_id } = props;
+    const {
+        name,
+        user_name,
+        email,
+        password,
+        // photo_url,
+        tg_id,
+    } = props;
 
+    const role = 1;
     return (
         await dataBasePool.query(
             `
-            INSERT INTO artist (name, user_name, role, photo_url, tg_id)
-            VALUES ($1, $2, $3, $4, $5)
+            INSERT INTO artist (name, user_name, email, password, role, tg_id)
+            VALUES ($1, $2, $3, $4, $5, $6)
             RETURNING *;
         `,
-            [name, user_name, role, photo_url, tg_id],
+            [name, user_name, email, password, role, tg_id],
         )
     ).rows[0];
 }
