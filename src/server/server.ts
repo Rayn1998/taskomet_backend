@@ -16,6 +16,8 @@ import {
 } from "@/server/controllers/artists.controller";
 import { getMyTasks } from "@/server/controllers/tasks.controller";
 import { checkServerConnection } from "@/server/controllers/check-server.controller";
+import { checkAuth } from "@/server/utils/passwordHash";
+import { login, logout } from "@/server/controllers/auth.controller";
 
 class Server {
     db: Pool;
@@ -43,6 +45,12 @@ class Server {
         const uploadsPath = join(process.cwd(), "uploads");
         app.use("/uploads", express.static(uploadsPath));
         console.log("Serving uploads from:", uploadsPath);
+
+        app.use("/login", login);
+        app.use("/logout", logout);
+
+        app.use(checkAuth);
+
         app.use("/projects", projectRoutes);
         app.use("/my-tasks/:executorId", getMyTasks);
         app.use("/task", taskRoutes);

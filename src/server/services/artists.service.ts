@@ -7,26 +7,31 @@ export async function getAll(): Promise<IArtist[]> {
 }
 
 export async function getArtist(
-    user_name: string,
+    email?: string,
+    user_name?: string,
 ): Promise<IArtist | undefined> {
-    return (
-        await dataBasePool.query("SELECT * FROM artist WHERE user_name = $1;", [
-            user_name,
-        ])
-    ).rows[0];
+    if (user_name === undefined) {
+        return (
+            await dataBasePool.query("SELECT * FROM artist WHERE email = $1;", [
+                email,
+            ])
+        ).rows[0];
+    }
+
+    if (email === undefined) {
+        return (
+            await dataBasePool.query(
+                "SELECT * FROM artist WHERE user_name = $1;",
+                [user_name],
+            )
+        ).rows[0];
+    }
 }
 
 export async function createArtist(
     props: Omit<IArtist, "id" | "role" | "photo_url">,
 ): Promise<IArtist> {
-    const {
-        name,
-        user_name,
-        email,
-        password,
-        // photo_url,
-        tg_id,
-    } = props;
+    const { name, user_name, email, password, tg_id } = props;
 
     const role = 1;
     return (
