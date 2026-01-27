@@ -16,7 +16,7 @@ import {
 } from "@/server/controllers/artists.controller";
 import { getMyTasks } from "@/server/controllers/tasks.controller";
 import { checkServerConnection } from "@/server/controllers/check-server.controller";
-import { checkAuth } from "@/server/utils/passwordHash";
+import { checkAuth } from "@/server/controllers/auth.controller";
 import { login, logout } from "@/server/controllers/auth.controller";
 
 class Server {
@@ -38,6 +38,7 @@ class Server {
                     "http://127.0.0.1:3000",
                     `${process.env.FRONTEND_DOMAIN}`,
                 ],
+                credentials: true,
             }),
         );
         app.use(express.json());
@@ -46,20 +47,20 @@ class Server {
         app.use("/uploads", express.static(uploadsPath));
         console.log("Serving uploads from:", uploadsPath);
 
-        app.use("/login", login);
-        app.use("/logout", logout);
+        app.post("/login", login);
+        app.get("/logout", logout);
+        app.post("/create-artist", createArtist);
+        app.use("/check-server", checkServerConnection);
 
         app.use(checkAuth);
 
         app.use("/projects", projectRoutes);
         app.use("/my-tasks/:executorId", getMyTasks);
         app.use("/task", taskRoutes);
-        app.use("/check-server", checkServerConnection);
 
         // artist
         app.get("/get-artist", getArtists);
         app.get("/get-artist/:user_name", getArtist);
-        app.post("/create-artist", createArtist);
         app.patch("/artist-role", updateArtistRole);
         app.patch("/update-new-artist", updateArtistAfterRegister);
         app.delete("/delete-artist", deleteArtist);

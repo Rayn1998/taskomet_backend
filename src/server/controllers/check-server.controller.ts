@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 
 export function checkServerConnection(req: Request, res: Response) {
-    return res.sendStatus(200);
+    res.setHeader("Cache-Control", "no-store");
+    return res.status(200).json({ ok: true });
 }

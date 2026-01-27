@@ -17,11 +17,11 @@ export const createSession = async (userId: number): Promise<string> => {
 };
 
 export const checkSession = async (
-    session: string,
+    cookie: string,
 ): Promise<ISession | undefined> => {
-    const sessionHash = createHash("sha256").update(session).digest("hex");
+    const sessionHash = createHash("sha256").update(cookie).digest("hex");
     try {
-        const existedSession = await sessionService.checkSession(sessionHash);
+        const existedSession = await sessionService.getSession(sessionHash);
         if (existedSession!) return existedSession;
     } catch (err) {
         throw new Error("Unauthorized");
@@ -30,11 +30,11 @@ export const checkSession = async (
 
 export const checkIfSessionExists = async (
     userId: number,
-): Promise<boolean> => {
+): Promise<ISession> => {
     return await sessionService.checkSessionByUserId(userId);
 };
 
-export const deleteSession = async (session: string): Promise<boolean> => {
-    const deletedSession = await sessionService.deleteSession(session);
+export const deleteSession = async (sessionHash: string): Promise<boolean> => {
+    const deletedSession = await sessionService.deleteSession(sessionHash);
     return deletedSession !== undefined ? true : false;
 };

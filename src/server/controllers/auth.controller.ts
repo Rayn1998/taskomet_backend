@@ -2,11 +2,7 @@ import { createHash } from "crypto";
 import { Request, Response, NextFunction } from "express";
 import { getArtist } from "@/server/services/artists.service";
 import { verifyPassword } from "@/server/utils/passwordHash";
-import {
-    createSession,
-    checkIfSessionExists,
-    deleteSession,
-} from "@/server/controllers/session.controller";
+import * as sessionController from "@/server/controllers/session.controller";
 import { getCookie } from "@/server/utils/getCookie";
 
 export const login = async (
@@ -14,35 +10,18 @@ export const login = async (
     res: Response,
     next: NextFunction,
 ) => {
-    const { email, userName, password } = req.body;
+    const { email, userName, password: receivedPassword } = req.body;
     try {
         const user = await getArtist(email, userName);
-        if (!user) return res.status(4001).send("Invalid credentials");
+        if (!user || !verifyPassword(receivedPassword, user.password))
+            return res.status(401).json({ message: "Invalid credentials" });
 
-        const loggedIn = await checkIfAlreadyLoggedIn(user.id);
-        if (loggedIn) return res.status(200).send("You are already logged in");
-
-        const checkAuth = await verifyPassword(password, user.password);
-        if (checkAuth) {
-            const session = await createSession(user.id);
-            return res
-                .cookie("session", session, {
-                    httpOnly: true,
-                    sameSite: "lax",
-                    secure: process.env.NODE_ENV === "production",
-                    path: "/",
-                })
-                .sendStatus(200);
-        } else {
-            throw new Error("Something in the provided data is incorrect");
-        }
+        const session = await sessionController.createSession(user.id);
+        const { password, ...userToClient } = user;
+        res.cookie("session", session).status(200).send(userToClient);
     } catch (err) {
         next(err);
     }
-};
-
-const checkIfAlreadyLoggedIn = async (userId: number): Promise<boolean> => {
-    return await checkIfSessionExists(userId);
 };
 
 export const logout = async (
@@ -50,21 +29,31 @@ export const logout = async (
     res: Response,
     next: NextFunction,
 ) => {
-    const session = getCookie(req, "session");
+    const cookie = getCookie(req, "session");
 
-    if (!session) return res.sendStatus(204);
-    const sessionHash = createHash("sha256").update(session).digest("hex");
-    const loggedOut = await deleteSession(sessionHash);
-    if (loggedOut) {
-        res.clearCookie("session", {
-            httpOnly: true,
-            sameSite: "lax",
-            secure: process.env.NODE_ENV === "production",
-            path: "/",
-        })
-            .status(200)
-            .send("You are logged out");
-    } else {
-        res.sendStatus(204);
+    if (cookie) {
+        const sessionHash = createHash("sha256").update(cookie).digest("hex");
+        await sessionController.deleteSession(sessionHash);
     }
+    res.cookie("session", "", {
+        expires: new Date(0),
+    })
+        .status(200)
+        .json({ message: "You are logged out" });
+};
+
+export const checkAuth = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) => {
+    if (!(req.headers.cookie && req.headers.cookie.startsWith("session")))
+        return res.status(401).json({ message: "Unauthorized" });
+    const cookie = getCookie(req, "session");
+    const session = await sessionController.checkSession(cookie!);
+    if (!session) return res.status(401).json({ message: "Unauthorized" });
+    if (new Date(session.expires_at).getTime() < Date.now())
+        return res.status(401).json({ message: "Session expiresd" });
+
+    next();
 };

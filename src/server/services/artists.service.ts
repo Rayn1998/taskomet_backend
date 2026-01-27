@@ -2,8 +2,11 @@ import dataBasePool from "@/db/db";
 import IArtist from "@shared/types/Artist";
 
 export async function getAll(): Promise<IArtist[]> {
-    return (await dataBasePool.query(`SELECT * FROM artist ORDER BY name;`))
-        .rows;
+    return (
+        await dataBasePool.query(
+            `SELECT id, name, user_name, email, tg_id, role, photo_url FROM artist ORDER BY name;`,
+        )
+    ).rows;
 }
 
 export async function getArtist(
@@ -19,6 +22,7 @@ export async function getArtist(
     }
 
     if (email === undefined) {
+        console.log("with user_name");
         return (
             await dataBasePool.query(
                 "SELECT * FROM artist WHERE user_name = $1;",

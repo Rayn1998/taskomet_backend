@@ -10,7 +10,7 @@
         "build": "tsc && tsc-alias",
         "build_and_start": "tsc && node dist/index.js",
         "dev": "tsnd --respawn -T -r tsconfig-paths/register src/index.ts",
-        "migratedb": "tsnd -T src/db/migrate.ts",
+        "migrate": "tsnd -T src/db/migrate.ts",
         "test": "vitest run"
     },
     "devDependencies": {

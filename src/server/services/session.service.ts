@@ -18,7 +18,7 @@ export const addSession = async (
     ).rows[0];
 };
 
-export const checkSession = async (sessionHash: string): Promise<ISession> => {
+export const getSession = async (sessionHash: string): Promise<ISession> => {
     return (
         await dataBasePool.query(
             `
@@ -32,8 +32,8 @@ export const checkSession = async (sessionHash: string): Promise<ISession> => {
 
 export const checkSessionByUserId = async (
     userId: number,
-): Promise<boolean> => {
-    const count = (
+): Promise<ISession> => {
+    return (
         await dataBasePool.query(
             `
                 SELECT * FROM sessions
@@ -41,11 +41,10 @@ export const checkSessionByUserId = async (
             `,
             [userId],
         )
-    ).rowCount;
-    return count && count > 0 ? true : false;
+    ).rows[0];
 };
 
-export const deleteSession = async (session: string): Promise<string> => {
+export const deleteSession = async (sessionHash: string): Promise<string> => {
     return (
         await dataBasePool.query(
             `
@@ -53,7 +52,7 @@ export const deleteSession = async (session: string): Promise<string> => {
             WHERE id = $1
             RETURNING id;
         `,
-            [session],
+            [sessionHash],
         )
     ).rows[0].id;
 };

@@ -161,6 +161,6 @@ export async function getMyTasks(
 
         res.json(tasks);
     } catch (err) {
-        next(err);
+        next(new Error("invalid credentials"));
     }
 }
