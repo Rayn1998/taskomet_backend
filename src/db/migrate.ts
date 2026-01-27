@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { Pool, PoolClient, DatabaseError } from "pg";
+import { Pool, PoolClient } from "pg";
 import { rm, access } from "fs/promises";
 import { join } from "path";
 import DBconfig from "@shared/types/DBconfig";
@@ -74,7 +74,7 @@ class Migrate {
                     name VARCHAR(50) NOT NULL,
                     user_name VARCHAR(50) NOT NULL UNIQUE,
                     email VARCHAR(50) NOT NULL UNIQUE,
-                    password VARCHAR(200) NOT NULL UNIQUE,
+                    password VARCHAR(200) NOT NULL,
                     tg_id BIGINT,
                     role INTEGER NOT NULL,
                     photo_url VARCHAR(100)
@@ -233,9 +233,12 @@ class Migrate {
     async addArtists() {
         try {
             await this.db.query(`
-            INSERT INTO artist (name, user_name, role, photo_url)
+            INSERT INTO artist (name, user_name, email, password, role, photo_url)
             VALUES 
-                ('Yuriy Bodolanov', 'bodolanov', 10, 'blob:https://web.telegram.org/976fe224-43df-4c79-bb6e-1ea02f1b4737');
+                ('Yuriy Bodolanov', 'bodolanov', 'test@mail.ru', '4fd4ddb5f003396885fc4db4d572fa5c:423302ceb85216cce76d0bb069a779da94d5510ece77893496163227ab4b2342afae5168e72943a28443721700c7b461db996d08e583966d609e497db1cd8de5', 10, 'blob:https://web.telegram.org/976fe224-43df-4c79-bb6e-1ea02f1b4737'),
+                ('Test User 1', 'bodolanov1', 'test1@mail.ru', '4fd4ddb5f003396885fc4db4d572fa5c:423302ceb85216cce76d0bb069a779da94d5510ece77893496163227ab4b2342afae5168e72943a28443721700c7b461db996d08e583966d609e497db1cd8de5', 1, 'blob:https://web.telegram.org/976fe224-43df-4c79-bb6e-1ea02f1b4737'),
+                ('Test User 2', 'bodolanov2', 'test2@mail.ru', '4fd4ddb5f003396885fc4db4d572fa5c:423302ceb85216cce76d0bb069a779da94d5510ece77893496163227ab4b2342afae5168e72943a28443721700c7b461db996d08e583966d609e497db1cd8de5', 1, 'blob:https://web.telegram.org/976fe224-43df-4c79-bb6e-1ea02f1b4737'),
+                ('Test User 3', 'bodolanov3', 'test3@mail.ru', '4fd4ddb5f003396885fc4db4d572fa5c:423302ceb85216cce76d0bb069a779da94d5510ece77893496163227ab4b2342afae5168e72943a28443721700c7b461db996d08e583966d609e497db1cd8de5', 1, 'blob:https://web.telegram.org/976fe224-43df-4c79-bb6e-1ea02f1b4737');
             `);
         } catch (err) {
             console.error(err);
@@ -265,11 +268,11 @@ async function migration() {
         await migrate.db.query("BEGIN");
         try {
             await migrate.createTables();
-            // await migrate.addArtists();
+            await migrate.addArtists();
             await migrate.addProjects();
             await migrate.addScenes();
-            // await migrate.addTasks();
-            // await migrate.addTaskData();
+            await migrate.addTasks();
+            await migrate.addTaskData();
 
             await migrate.db.query("COMMIT");
             console.log("Migration completed");

@@ -1,5 +1,6 @@
 import dataBasePool from "@/db/db";
 import IArtist from "@shared/types/Artist";
+import { ApiError } from "../error/ApiError";
 
 export async function getAll(): Promise<IArtist[]> {
     return (
@@ -38,16 +39,36 @@ export async function createArtist(
     const { name, user_name, email, password, tg_id } = props;
 
     const role = 1;
-    return (
-        await dataBasePool.query(
-            `
+
+    try {
+        const newArtist: IArtist = (
+            await dataBasePool.query(
+                `
             INSERT INTO artist (name, user_name, email, password, role, tg_id)
             VALUES ($1, $2, $3, $4, $5, $6)
             RETURNING *;
         `,
-            [name, user_name, email, password, role, tg_id],
-        )
-    ).rows[0];
+                [name, user_name, email, password, role, tg_id],
+            )
+        ).rows[0];
+
+        return newArtist;
+    } catch (err: any) {
+        if (err.code === "23505") {
+            if (err.constraint === "artist_user_name_key") {
+                throw ApiError.conflict(
+                    "User with this userName already exists",
+                );
+            }
+            if (err.constraint === "artist_email_key") {
+                throw ApiError.conflict("User with this email already exists");
+            }
+
+            throw ApiError.conflict("Artist already exists");
+        }
+
+        throw err;
+    }
 }
 
 export async function updateArtistRole(

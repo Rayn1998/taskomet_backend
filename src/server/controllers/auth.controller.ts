@@ -13,7 +13,11 @@ export const login = async (
     const { email, userName, password: receivedPassword } = req.body;
     try {
         const user = await getArtist(email, userName);
-        if (!user || !verifyPassword(receivedPassword, user.password))
+        const passVerification = await verifyPassword(
+            receivedPassword,
+            user!.password,
+        );
+        if (!user || !passVerification)
             return res.status(401).json({ message: "Invalid credentials" });
 
         const session = await sessionController.createSession(user.id);

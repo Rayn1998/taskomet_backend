@@ -60,7 +60,8 @@ export async function createArtist(
             password: passwordHash,
         });
         const session = await sessionController.createSession(newArtist.id);
-        res.cookie("session", session).status(200).json({ ok: true });
+        const { password: userPassword, ...artistToFront } = newArtist;
+        res.cookie("session", session).status(200).json(artistToFront);
     } catch (err) {
         next(err);
     }

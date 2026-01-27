@@ -7,7 +7,6 @@ export function errorHandler(
     res: Response,
     next: NextFunction,
 ) {
-    // console.error(err);
     // сделать логгирование ошибок для дальнейшей обработки и анализа
 
     if (err instanceof ApiError) {
@@ -16,7 +15,9 @@ export function errorHandler(
         });
     }
 
+    console.error(err);
+
     return res.status(500).json({
-        message: err.message,
+        message: "Internal server error",
     });
 }
