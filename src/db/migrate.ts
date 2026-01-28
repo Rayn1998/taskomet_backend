@@ -125,6 +125,29 @@ class Migrate {
             `);
 
             await this.db.query(`
+                CREATE TABLE shots(
+                    id SERIAL PRIMARY KEY,
+                    name VARCHAR(50) NOT NULL,
+                    status INTEGER NOT NULL,
+                    priority INTEGER NOT NULL,
+                    description VARCHAR(500),
+                    scene INTEGER REFERENCES scenes(id) ON DELETE CASCADE,
+                    project INTEGER REFERENCES projects(id) ON DELETE CASCADE
+                );
+            `);
+
+            await this.db.query(`
+                CREATE TABLE shot_data(
+                    id SERIAL PRIMARY KEY,
+                    shot_id INTEGER REFERENCES shots(id) ON DELETE CASCADE,
+                    text VARCHAR(1000),
+                    media VARCHAR(100),
+                    created_at TIMESTAMP NOT NULL,
+                    created_by INTEGER REFERENCES artist(id) ON DELETE SET NULL
+                );
+            `);
+
+            await this.db.query(`
                 CREATE TABLE tasks(
                     id SERIAL PRIMARY KEY NOT NULL,
                     name VARCHAR(50) NOT NULL,
@@ -134,7 +157,8 @@ class Migrate {
                     priority INTEGER NOT NULL,
                     description VARCHAR(500) NOT NULL,
                     project INTEGER REFERENCES projects(id) ON DELETE CASCADE,
-                    scene INTEGER REFERENCES scenes(id) ON DELETE CASCADE
+                    scene INTEGER REFERENCES scenes(id) ON DELETE CASCADE,
+                    shot INTEGER REFERENCES shots(id) ON DELETE CASCADE
                 );
             `);
 
@@ -233,12 +257,12 @@ class Migrate {
     async addArtists() {
         try {
             await this.db.query(`
-            INSERT INTO artist (name, user_name, email, password, role, photo_url)
+            INSERT INTO artist (name, user_name, email, password, role)
             VALUES 
-                ('Yuriy Bodolanov', 'bodolanov', 'test@mail.ru', '4fd4ddb5f003396885fc4db4d572fa5c:423302ceb85216cce76d0bb069a779da94d5510ece77893496163227ab4b2342afae5168e72943a28443721700c7b461db996d08e583966d609e497db1cd8de5', 10, 'blob:https://web.telegram.org/976fe224-43df-4c79-bb6e-1ea02f1b4737'),
-                ('Test User 1', 'bodolanov1', 'test1@mail.ru', '4fd4ddb5f003396885fc4db4d572fa5c:423302ceb85216cce76d0bb069a779da94d5510ece77893496163227ab4b2342afae5168e72943a28443721700c7b461db996d08e583966d609e497db1cd8de5', 1, 'blob:https://web.telegram.org/976fe224-43df-4c79-bb6e-1ea02f1b4737'),
-                ('Test User 2', 'bodolanov2', 'test2@mail.ru', '4fd4ddb5f003396885fc4db4d572fa5c:423302ceb85216cce76d0bb069a779da94d5510ece77893496163227ab4b2342afae5168e72943a28443721700c7b461db996d08e583966d609e497db1cd8de5', 1, 'blob:https://web.telegram.org/976fe224-43df-4c79-bb6e-1ea02f1b4737'),
-                ('Test User 3', 'bodolanov3', 'test3@mail.ru', '4fd4ddb5f003396885fc4db4d572fa5c:423302ceb85216cce76d0bb069a779da94d5510ece77893496163227ab4b2342afae5168e72943a28443721700c7b461db996d08e583966d609e497db1cd8de5', 1, 'blob:https://web.telegram.org/976fe224-43df-4c79-bb6e-1ea02f1b4737');
+                ('Yuriy Bodolanov', 'bodolanov', 'test@mail.ru', '4fd4ddb5f003396885fc4db4d572fa5c:423302ceb85216cce76d0bb069a779da94d5510ece77893496163227ab4b2342afae5168e72943a28443721700c7b461db996d08e583966d609e497db1cd8de5', 10),
+                ('Test User 1', 'bodolanov1', 'test1@mail.ru', '4fd4ddb5f003396885fc4db4d572fa5c:423302ceb85216cce76d0bb069a779da94d5510ece77893496163227ab4b2342afae5168e72943a28443721700c7b461db996d08e583966d609e497db1cd8de5', 1),
+                ('Test User 2', 'bodolanov2', 'test2@mail.ru', '4fd4ddb5f003396885fc4db4d572fa5c:423302ceb85216cce76d0bb069a779da94d5510ece77893496163227ab4b2342afae5168e72943a28443721700c7b461db996d08e583966d609e497db1cd8de5', 1),
+                ('Test User 3', 'bodolanov3', 'test3@mail.ru', '4fd4ddb5f003396885fc4db4d572fa5c:423302ceb85216cce76d0bb069a779da94d5510ece77893496163227ab4b2342afae5168e72943a28443721700c7b461db996d08e583966d609e497db1cd8de5', 1);
             `);
         } catch (err) {
             console.error(err);

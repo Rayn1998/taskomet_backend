@@ -2,6 +2,11 @@ import dataBasePool from "@/db/db";
 import IArtist from "@shared/types/Artist";
 import { ApiError } from "../error/ApiError";
 
+type GetArtistParams =
+    | { id: number }
+    | { email: string }
+    | { user_name: string };
+
 export async function getAll(): Promise<IArtist[]> {
     return (
         await dataBasePool.query(
@@ -11,24 +16,30 @@ export async function getAll(): Promise<IArtist[]> {
 }
 
 export async function getArtist(
-    email?: string,
-    user_name?: string,
+    params: GetArtistParams,
 ): Promise<IArtist | undefined> {
-    if (user_name === undefined) {
+    if ("email" in params) {
         return (
             await dataBasePool.query("SELECT * FROM artist WHERE email = $1;", [
-                email,
+                params.email,
             ])
         ).rows[0];
     }
 
-    if (email === undefined) {
-        console.log("with user_name");
+    if ("user_name" in params) {
         return (
             await dataBasePool.query(
                 "SELECT * FROM artist WHERE user_name = $1;",
-                [user_name],
+                [params.user_name],
             )
+        ).rows[0];
+    }
+
+    if ("id" in params) {
+        return (
+            await dataBasePool.query("SELECT * FROM artist WHERE id = $1;", [
+                params.id,
+            ])
         ).rows[0];
     }
 }

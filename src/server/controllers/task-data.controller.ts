@@ -57,7 +57,7 @@ export async function deleteComment(
         if (deleted.media && deleted.media !== null) {
             fs.rm(deleted.media);
         }
-        if (deleted) res.sendStatus(200);
+        if (deleted) res.status(200).json({ ok: true });
     } catch (err) {
         next(err);
     }

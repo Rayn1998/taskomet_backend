@@ -16,7 +16,7 @@ import {
 } from "@/server/controllers/artists.controller";
 import { getMyTasks } from "@/server/controllers/tasks.controller";
 import { checkServerConnection } from "@/server/controllers/check-server.controller";
-import { checkAuth } from "@/server/controllers/auth.controller";
+import { checkAuth, sendUserData } from "@/server/controllers/auth.controller";
 import { login, logout } from "@/server/controllers/auth.controller";
 
 class Server {
@@ -54,6 +54,7 @@ class Server {
 
         app.use(checkAuth);
 
+        app.get("/me", sendUserData);
         app.use("/projects", projectRoutes);
         app.use("/my-tasks/:executorId", getMyTasks);
         app.use("/task", taskRoutes);

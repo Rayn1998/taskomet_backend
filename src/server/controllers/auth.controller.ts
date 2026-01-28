@@ -5,6 +5,8 @@ import { verifyPassword } from "@/server/utils/passwordHash";
 import * as sessionController from "@/server/controllers/session.controller";
 import { getCookie } from "@/server/utils/getCookie";
 
+import type IArtist from "@shared/types/Artist";
+
 export const login = async (
     req: Request,
     res: Response,
@@ -12,7 +14,9 @@ export const login = async (
 ) => {
     const { email, userName, password: receivedPassword } = req.body;
     try {
-        const user = await getArtist(email, userName);
+        const user = email
+            ? await getArtist({ email })
+            : await getArtist({ user_name: userName });
         const passVerification = await verifyPassword(
             receivedPassword,
             user!.password,
@@ -60,4 +64,19 @@ export const checkAuth = async (
         return res.status(401).json({ message: "Session expiresd" });
 
     next();
+};
+
+export const sendUserData = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) => {
+    if (!(req.headers.cookie && req.headers.cookie.startsWith("session")))
+        return res.status(401).json({ message: "Unauthorized" });
+    const cookie = getCookie(req, "session");
+    const session = await sessionController.checkSession(cookie!);
+    if (!session) return res.status(401).json({ message: "Unauthorized" });
+    const user = await getArtist({ id: session.user_id });
+    if (!user) return res.status(401).json({ message: "Unauthorized" });
+    return res.status(200).json(user);
 };
