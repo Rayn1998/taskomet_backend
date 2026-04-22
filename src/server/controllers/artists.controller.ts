@@ -3,129 +3,77 @@ import { hashPassword } from "@/server/utils/passwordHash";
 import * as sessionController from "@/server/controllers/session.controller";
 import * as artistService from "@/server/services/artists.service";
 
+import { isArtistRole } from "@/typeguards/typeguards";
+
 import IArtist from "@shared/types/Artist";
 
-export async function getArtists(
-    req: Request,
-    res: Response,
-    next: NextFunction,
-) {
-    try {
-        const artist: IArtist[] = await artistService.getAll();
-        res.json(artist);
-    } catch (err) {
-        next(err);
-    }
+export async function getArtists(req: Request, res: Response, next: NextFunction) {
+	try {
+		const artist: IArtist[] = await artistService.getAll();
+		res.json(artist);
+	} catch (err) {
+		next(err);
+	}
 }
 
-export async function getArtist(
-    req: Request,
-    res: Response,
-    next: NextFunction,
-) {
-    const { user_name } = req.params ?? {};
-    if (!user_name)
-        return next(new Error("No necessary data provided: user_name"));
+export async function getArtist(req: Request, res: Response, next: NextFunction) {
+	const { user_name } = req.params ?? {};
+	if (!user_name) return next(new Error("No necessary data provided: user_name"));
 
-    try {
-        const artist = await artistService.getArtist(user_name);
-        if (artist === undefined) return res.json([]);
-        res.json(artist);
-    } catch (err) {
-        next(err);
-    }
+	try {
+		const artist = await artistService.getArtist({ user_name });
+		if (artist === undefined) return res.json([]);
+		res.json(artist);
+	} catch (err) {
+		next(err);
+	}
 }
 
-export async function createArtist(
-    req: Request,
-    res: Response,
-    next: NextFunction,
-) {
-    const { name, user_name, email, password }: Omit<IArtist, "id"> =
-        req.body ?? {};
+export async function updateArtistRole(req: Request, res: Response, next: NextFunction) {
+	const { artistId, role } = req.body;
 
-    if (!(name && user_name && email && password))
-        return next(
-            new Error(
-                "Necessary data not provided: name, user_name, email, password",
-            ),
-        );
+	if (!(artistId && Number.isInteger(role))) return next(new Error("Necessary data not provided: artistId or role"));
+	if (!isArtistRole(role)) return next(new Error("Incorrect role entered"));
 
-    try {
-        const passwordHash = await hashPassword(password);
-        const newArtist = await artistService.createArtist({
-            name,
-            user_name,
-            email,
-            password: passwordHash,
-        });
-        const session = await sessionController.createSession(newArtist.id);
-        const { password: userPassword, ...artistToFront } = newArtist;
-        res.cookie("session", session).status(200).json(artistToFront);
-    } catch (err) {
-        next(err);
-    }
+	try {
+		const updatedArtist = await artistService.updateArtistRole(artistId, role);
+		res.json(updatedArtist);
+	} catch (err) {
+		next(err);
+	}
 }
 
-export async function updateArtistRole(
-    req: Request,
-    res: Response,
-    next: NextFunction,
-) {
-    const { artistId, role } = req.body;
+export async function deleteArtist(req: Request, res: Response, next: NextFunction) {
+	const { artistId } = req.query ?? null;
 
-    if (!(artistId && Number.isInteger(role)))
-        return next(new Error("Necessary data not provided: artistId or role"));
+	if (!artistId) return next(new Error("Necessary data not provided: artist Id"));
 
-    try {
-        const updatedArtist = await artistService.updateArtistRole(
-            artistId,
-            role,
-        );
-        res.json(updatedArtist);
-    } catch (err) {
-        next(err);
-    }
+	try {
+		const deletedArtist = await artistService.deleteArtist(+artistId);
+		res.json(deletedArtist);
+	} catch (err) {
+		next(err);
+	}
 }
 
-export async function updateArtistAfterRegister(
-    req: Request,
-    res: Response,
-    next: NextFunction,
-) {
-    const { photo_url, tg_id, user_name } = req.body;
-    if (!(tg_id && user_name))
-        return next(
-            new Error(
-                "Necessary data not provided: photo_url, tg_id, user_name",
-            ),
-        );
-    try {
-        // const updatedArtist = await artistService.updateArtistAfterRegister({
-        //     photo_url,
-        //     tg_id,
-        //     user_name,
-        // });
-        // res.json(updatedArtist);
-    } catch (err) {
-        next(err);
-    }
-}
+export async function createArtist(req: Request, res: Response, next: NextFunction) {
+	const { name, user_name, email, password }: Omit<IArtist, "id"> = req.body ?? {};
 
-export async function deleteArtist(
-    req: Request,
-    res: Response,
-    next: NextFunction,
-) {
-    const { artistId } = req.query ?? null;
+	if (!(name && user_name && email && password))
+		return next(new Error("Necessary data not provided: name, user_name, email, password"));
 
-    if (!artistId)
-        return next(new Error("Necessary data not provided: artist Id"));
-
-    try {
-        const deletedArtist = await artistService.deleteArtist(+artistId);
-        res.json(deletedArtist);
-    } catch (err) {
-        next(err);
-    }
+	try {
+		const passwordHash = await hashPassword(password);
+		const newArtist = await artistService.createArtist({
+			name,
+			user_name,
+			email,
+			password: passwordHash,
+		});
+		const session = await sessionController.createSession(newArtist.id);
+		const { password: userPassword, ...artistToFront } = newArtist;
+		res.cookie("session", session).status(200).json(artistToFront);
+	} catch (err) {
+		next(err);
+	}
 }

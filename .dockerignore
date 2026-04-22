@@ -1,0 +1,6 @@
+.VSCodeCounter
+dist
+node_modules
+uploads
+statusCodes.md
+DICTIONARY.md

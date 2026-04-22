@@ -1,4 +1,5 @@
 import express from "express";
+import chalk from "chalk";
 import { join } from "path";
 
 import cors from "cors";
@@ -7,12 +8,11 @@ import projectRoutes from "@/server/routes/projects.routes";
 import taskRoutes from "@/server/routes/task.routes";
 import { errorHandler } from "@/server/error/errorHandler";
 import {
-    getArtists,
-    getArtist,
-    createArtist,
-    deleteArtist,
-    updateArtistRole,
-    updateArtistAfterRegister,
+	getArtists,
+	getArtist,
+	createArtist,
+	deleteArtist,
+	updateArtistRole,
 } from "@/server/controllers/artists.controller";
 import { getMyTasks } from "@/server/controllers/tasks.controller";
 import { checkServerConnection } from "@/server/controllers/check-server.controller";
@@ -20,70 +20,65 @@ import { checkAuth, sendUserData } from "@/server/controllers/auth.controller";
 import { login, logout } from "@/server/controllers/auth.controller";
 
 class Server {
-    db: Pool;
-    port: number;
+	db: Pool;
+	port: number;
 
-    constructor(dbInstance: Pool, port = 3001) {
-        this.db = dbInstance;
-        this.port = port;
-    }
+	constructor(dbInstance: Pool, port = 3001) {
+		this.db = dbInstance;
+		this.port = port;
+	}
 
-    run() {
-        const app = express();
+	run() {
+		const app = express();
 
-        app.use(
-            cors({
-                origin: [
-                    "http://localhost:3000",
-                    "http://127.0.0.1:3000",
-                    `${process.env.FRONTEND_DOMAIN}`,
-                ],
-                credentials: true,
-            }),
-        );
-        app.use(express.json());
+		app.use(
+			cors({
+				origin: ["http://localhost:5173", "http://127.0.0.1:5173", `${process.env.FRONTEND_DOMAIN}`],
+				credentials: true,
+			}),
+		);
+		app.use(express.json());
 
-        const uploadsPath = join(process.cwd(), "uploads");
-        app.use("/uploads", express.static(uploadsPath));
-        console.log("Serving uploads from:", uploadsPath);
+		const uploadsPath = join(process.cwd(), "uploads");
+		app.use("/uploads", express.static(uploadsPath));
+		console.log("Serving uploads from:", uploadsPath);
 
-        app.post("/login", login);
-        app.get("/logout", logout);
-        app.post("/create-artist", createArtist);
-        app.use("/check-server", checkServerConnection);
+		app.post("/login", login);
+		app.get("/logout", logout);
+		app.post("/create-artist", createArtist);
+		app.use("/check-server", checkServerConnection);
 
-        app.use(checkAuth);
+		app.use(checkAuth);
 
-        app.get("/me", sendUserData);
-        app.use("/projects", projectRoutes);
-        app.use("/my-tasks/:executorId", getMyTasks);
-        app.use("/task", taskRoutes);
+		app.get("/me", sendUserData);
+		app.use("/projects", projectRoutes);
+		app.use("/my-tasks/:executorId", getMyTasks);
+		app.use("/task", taskRoutes);
 
-        // artist
-        app.get("/get-artist", getArtists);
-        app.get("/get-artist/:user_name", getArtist);
-        app.patch("/artist-role", updateArtistRole);
-        app.patch("/update-new-artist", updateArtistAfterRegister);
-        app.delete("/delete-artist", deleteArtist);
+		// artist
+		app.get("/get-artist", getArtists);
+		app.get("/get-artist/:user_name", getArtist);
+		app.patch("/artist-role", updateArtistRole);
+		app.delete("/delete-artist", deleteArtist);
 
-        app.get("/download/:folder/:filename", (req, res, next) => {
-            const { folder, filename } = req.params;
+		app.get("/download/:folder/:filename", (req, res, next) => {
+			const { folder, filename } = req.params;
 
-            const filePath = join(process.cwd(), "uploads", folder, filename);
+			const filePath = join(process.cwd(), "uploads", folder, filename);
 
-            res.download(filePath, filename, (err) => {
-                if (err) {
-                    next(err);
-                }
-            });
-        });
+			res.download(filePath, filename, (err) => {
+				if (err) {
+					next(err);
+				}
+			});
+		});
 
-        app.use(errorHandler);
+		app.use(errorHandler);
 
-        app.listen(this.port, () => {
-            console.log(`Server started to listen on ${this.port} port`);
-        });
-    }
+		app.listen(this.port, () => {
+			console.log(chalk.green(`Server started to listen on ${this.port} port`));
+		});
+	}
 }
 
 export default Server;

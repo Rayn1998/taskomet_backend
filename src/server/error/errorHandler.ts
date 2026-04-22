@@ -1,23 +1,22 @@
 import { Request, Response, NextFunction } from "express";
 import { ApiError } from "./ApiError";
 
-export function errorHandler(
-    err: Error,
-    req: Request,
-    res: Response,
-    next: NextFunction,
-) {
-    // сделать логгирование ошибок для дальнейшей обработки и анализа
+export function errorHandler(err: Error, req: Request, res: Response, next: NextFunction) {
+	// сделать логгирование ошибок для дальнейшей обработки и анализа
 
-    if (err instanceof ApiError) {
-        return res.status(err.status).json({
-            message: err.message,
-        });
-    }
+	if (err instanceof ApiError) {
+		return res.status(err.status).json({
+			message: err.message,
+		});
+	}
 
-    console.error(err);
+	if ("message" in err) {
+		return res.status(400).json({ message: err.message });
+	}
 
-    return res.status(500).json({
-        message: "Internal server error",
-    });
+	console.error(err);
+
+	return res.status(500).json({
+		message: "Internal server error",
+	});
 }
